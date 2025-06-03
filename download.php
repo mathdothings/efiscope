@@ -93,12 +93,12 @@ function download(array $request)
 
     $prefix = $taxType === 'nfe' ? 'NFE_' : 'NFCE_';
 
-    $outputFile = $downloadDir .
-        DIRECTORY_SEPARATOR .
-        $prefix .
-        new DateTime($request['dateEnd'])->format('d-m-Y') .
-        '_' . uniqid() . '_' .
-        '.zip';
+    $outputFile = $downloadDir
+        . DIRECTORY_SEPARATOR
+        . $prefix
+        . new DateTime($request['dateEnd'])->format('d-m-Y_H-i-s')
+        . uniqid()
+        . '.zip';
 
     $fileHandle = fopen($outputFile, 'w');
     curl_setopt($ch, CURLOPT_FILE, $fileHandle);

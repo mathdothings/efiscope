@@ -111,28 +111,29 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
     $tinyRequests = $data;
     $dataFim = str_replace('-', '/', new DateTime($data['dateEnd'])->format('d-m-Y'));
 
+    $tipo = 'busca';
+    if (isset($keysList[0]) && !empty($keysList[0])) {
+        $tipo = 'chaves';
+    }
+
     if ($start) {
-        if (count($keysList) <= 1) {
-            for ($i = $diaInicial; $i <= $dataFinal; $i++) {
-                $dia = $i > 9 ? $i : '0' . $i;
+        if ($tipo === 'busca') {
+            for ($i = 0; $i < $dataFinal; $i++) {
+                $d = $diaInicial;
+                $d += $i;
+                $dia = $d > 9 ? $d : '0' . $d;
                 $parts = explode('/', $dataFim);
                 $dtFim = "$parts[2]-$parts[1]-$dia";
                 $tinyRequests['dateStart'] = $dtFim;
                 $tinyRequests['dateEnd'] = $dtFim;
-                // echo json_encode($tinyRequests, JSON_PRETTY_PRINT);
-                // echo '</br>';
-                // echo '</br>';
                 fetch($tinyRequests);
 
                 if ($i !== $dataFinal) {
-                    sleep(rand(15, 30));
+                    sleep(rand(5, 15));
                 }
             }
-        } elseif (count($keysList) > 0) {
+        } else {
             $tinyRequests['chavesDeAcesso'] = $keysList;
-            // echo json_encode($tinyRequests, JSON_PRETTY_PRINT);
-            // echo '</br>';
-            // echo '</br>';
             download($tinyRequests);
         }
     }
