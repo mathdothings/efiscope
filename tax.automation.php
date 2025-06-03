@@ -10,7 +10,7 @@ $ieEmit = $_POST['ie-emit'] ?? '';
 $contribuitionType = $_POST['contribuition-type'] ?? '';
 $dateStart = $_POST['date-start'] ?? '';
 $dateEnd = $_POST['date-end'] ?? '';
-$keysList = preg_split('/\R/', trim($_POST['keys-list'] ?? '')) ?? '';
+$keysList = preg_split('/\R/', trim(str_replace("'", '', $_POST['keys-list']) ?? '')) ?? '';
 $start = isset($_POST['start']) ? true : false;
 
 $data = [
