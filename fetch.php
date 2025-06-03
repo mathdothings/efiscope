@@ -91,11 +91,7 @@ function fetch(array $request)
     $msgErro = $newDom->getElementById('msgErro');
 
     if (strpos($msgErro->innerHTML, 'ERRO')) {
-        echo '<p style="background-color: #f8a1a2;
-        color: #f52b37;
-        padding: 1rem;
-        width: 50%;
-        border-radius: 10px;">Erro ao validar sessão!</p>';
+        echo '<h3>Erro ao validar sessão!</h3>';
         die();
     }
 
