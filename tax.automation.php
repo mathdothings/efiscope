@@ -40,6 +40,10 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
     <!-- <link rel="shortcut icon" href="https://efiscoi.sefaz.pe.gov.br/favicon.ico" type="image/x-icon"> -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
+        body {
+            font-size: 1rem;
+        }
+
         h3 {
             margin: 0 auto;
             text-align: center;
