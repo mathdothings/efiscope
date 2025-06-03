@@ -96,7 +96,8 @@ function download(array $request)
     $outputFile = $downloadDir
         . DIRECTORY_SEPARATOR
         . $prefix
-        . new DateTime($request['dateEnd'])->format('d-m-Y_H-i-s')
+        . new DateTime($request['dateEnd'])->format('d-m-Y')
+        . '_'
         . uniqid()
         . '.zip';
 

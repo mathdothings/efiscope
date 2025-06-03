@@ -97,7 +97,7 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
                 <label for="date-end">Data Final</label>
                 <input name="date-end" type="date" value='<?= $_POST['date-end'] ?? '' ?>'>
                 <br>
-                <label for="keys-list">Chaves</label>
+                <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
                                                                     htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
                                                                     ?></textarea>
