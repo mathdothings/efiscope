@@ -43,8 +43,8 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
         h3 {
             margin: 0 auto;
             text-align: center;
-            background-color: #f8a1a2;
-            color: #f52b37;
+            background-color: #f52b37;
+            color: white;
             padding: 1rem;
             width: 50%;
             border-radius: 10px;
@@ -62,6 +62,12 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
 
         #submit-button:hover {
             background-color: #51a2ff;
+        }
+
+        #session-error {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
