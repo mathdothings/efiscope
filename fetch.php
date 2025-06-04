@@ -79,14 +79,6 @@ function fetch(array $request)
         $response = fetchNfce($request);
     }
 
-    // var_dump($response);
-
-    // if (curl_errno($ch)) {
-    //     echo 'Error:' . curl_error($ch);
-    // } else {
-    //     // echo $response;
-    // }
-
     $newDom = Dom\HTMLDocument::createFromString($response);
     $msgErro = $newDom->getElementById('msgErro');
 

@@ -6,7 +6,6 @@ function fetchNfce(array $request)
     $jsSession = $request['jsSession'];
     $user = $request['user'];
     $ieEmitente = $request['ieEmit'];
-    $tipoContribuinte = $request['contribuition-type'];
     $dataInicio = str_replace('-', '/', new DateTime($request['dateStart'])->format('d-m-Y'));
     $dataFim = str_replace('-', '/', new DateTime($request['dateEnd'])->format('d-m-Y'));
 

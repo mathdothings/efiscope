@@ -1,6 +1,18 @@
 <?php
 
+require_once __DIR__ . '/App/Utils/dd.php';
+require_once __DIR__ . '/App/Utils/pretty_print.php';
+require_once __DIR__ . '/App/DTOs/SubmitDTO.php';
+require_once __DIR__ . '/App/Http/Request.php';
+require_once __DIR__ . '/App/Scrapper/Scrapper.php';
 require_once __DIR__ . '/fetch.php';
+
+use function App\Utils\dd;
+use function App\Utils\pretty_print;
+
+use App\DTOs\FormSubmission\SubmitDTO;
+use App\Http\Request;
+use App\Scrapper\Scrapper;
 
 $taxType = $_POST['tax-type'] ?? '';
 $session = $_POST['session'] ?? '';
@@ -10,7 +22,11 @@ $ieEmit = $_POST['ie-emit'] ?? '';
 $contribuitionType = $_POST['contribuition-type'] ?? '';
 $dateStart = $_POST['date-start'] ?? '';
 $dateEnd = $_POST['date-end'] ?? '';
-$keysList = preg_split('/\R/', trim(str_replace("'", '', $_POST['keys-list']) ?? '')) ?? '';
+$keysList = array_filter(
+    preg_split('/\R/', trim(str_replace("'", '', $_POST['keys-list'] ?? ''))),
+    fn($item) => $item !== ''
+);
+
 $start = isset($_POST['start']) ? true : false;
 
 $data = [
@@ -26,8 +42,9 @@ $data = [
     'start' => $start
 ];
 
-$dataFinal = (int) new DateTime($data['dateEnd'])->format('d') - (int) new DateTime($data['dateStart'])->format('d') + 1;
-$diaInicial = (int) new DateTime($data['dateStart'])->format('d');
+$dto = SubmitDTO::create($data);
+$scrapper = new Scrapper($dto);
+$request = new Request($dto);
 ?>
 
 <!DOCTYPE html>
@@ -37,7 +54,6 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baixar NFe e NFCE | e-Fisco PE</title>
-    <!-- <link rel="shortcut icon" href="https://efiscoi.sefaz.pe.gov.br/favicon.ico" type="image/x-icon"> -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
         body {
@@ -127,35 +143,45 @@ $diaInicial = (int) new DateTime($data['dateStart'])->format('d');
     </div>
     <br>
     <?php
-    $tinyRequests = $data;
-    $dataFim = str_replace('-', '/', new DateTime($data['dateEnd'])->format('d-m-Y'));
 
-    $tipo = 'busca';
-    if (isset($keysList[0]) && !empty($keysList[0])) {
-        $tipo = 'chaves';
+    $final = (int) new DateTime($dto->dateEnd)->format('d') - (int) new DateTime($dto->dateStart)->format('d') + 1;
+    $initial = (int) new DateTime($dto->dateStart)->format('d');
+    $dates = [];
+    $keys = [];
+
+    if (!$start) {
+        return;
     }
 
-    if ($start) {
-        if ($tipo === 'busca') {
-            for ($i = 0; $i < $dataFinal; $i++) {
-                $d = $diaInicial;
-                $d += $i;
-                $dia = $d > 9 ? $d : '0' . $d;
-                $parts = explode('/', $dataFim);
-                $dtFim = "$parts[2]-$parts[1]-$dia";
-                $tinyRequests['dateStart'] = $dtFim;
-                $tinyRequests['dateEnd'] = $dtFim;
-                fetch($tinyRequests);
+    if (count($dto->keysList)) {
+        $request->download($dto->keysList);
+    }
 
-                if ($i !== $dataFinal) {
-                    sleep(rand(5, 15));
-                }
-            }
-        } else {
-            $tinyRequests['chavesDeAcesso'] = $keysList;
-            download($tinyRequests);
+    for ($i = 0; $i < $final; $i++) {
+        $d = $initial;
+        $d += $i;
+        $day = $d > 9 ? $d : '0' . $d;
+        $parts = explode('-', $dto->dateEnd);
+        $dt = "$parts[2]/$parts[1]/$parts[0]";
+
+        $dates[] = $dt;
+    }
+
+    foreach ($dates as $date) {
+        if ($dto->taxType === 'nfe') {
+            $response = $request->NFEAttempt($date);
+            $keys[] = $scrapper->scrap($response);
         }
+
+        if ($dto->taxType === 'nfce') {
+            $response = $request->NFCEAttempt($date);
+            $keys[] = $scrapper->scrap($response);
+        }
+
+        sleep(rand(5, 15));
     }
+
+    $request->download($keys);
     ?>
 </body>
 
