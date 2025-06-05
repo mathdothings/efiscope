@@ -2,11 +2,13 @@
 
 namespace App\Scrapper;
 
+use function App\Utils\dd;
 use App\DTOs\FormSubmission\SubmitDTO;
 use Dom\HTMLDocument;
 
 final class Scrapper
 {
+    public string $date = '';
     public function __construct(private SubmitDTO $dto) {}
 
     public function scrap(string $response): array
@@ -23,7 +25,7 @@ final class Scrapper
 
         $amount = $dom->querySelectorAll('.thickbox');
         $elements = $dom->querySelectorAll('.tabelaCadastroLinha');
-        echo '<p>Total: ' . $amount->length . ' (' . $this->dto->dateStart . ')' . '</p>';
+        echo '<p>Total: ' . $amount->length . ' (' . $this->date . ')' . '</p>';
 
         if ($amount->length === 500) echo '<h3 style="background-color: #f8a1a2; color: #f52b37; padding: 1rem;"> Houveram mais de 500 registros em ' . $this->dto->dateStart . '</h1>';
 

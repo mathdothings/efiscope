@@ -6,11 +6,13 @@ namespace App\Http;
 
 use DateTime;
 
+use DateTimeZone;
 use function App\Utils\dd;
 use App\DTOs\FormSubmission\SubmitDTO;
 
 final class Request
 {
+    public string $date = '';
     public function __construct(private SubmitDTO $dto) {}
 
     function NFEAttempt(string $date): string
@@ -236,9 +238,7 @@ final class Request
         $filepath = $downloadDir
             . DIRECTORY_SEPARATOR
             . $prefix
-            . new DateTime($this->dto->dateEnd)->format('d-m-Y')
-            . '_'
-            . uniqid()
+            . new DateTime($this->date, timezone: new DateTimeZone('America/Sao_Paulo'))->format('d-m-Y_H-i-s')
             . '.zip';
 
         $fileHandle = fopen($filepath, 'w');
