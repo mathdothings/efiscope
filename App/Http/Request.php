@@ -86,8 +86,8 @@ final class Request
             'ieEmitente' => $this->dto->ieEmit,
             'cnpjEmitente' => '',
             'cpfCnpjDest' => '',
-            'numNota' => '',
-            'serie' => '',
+            'numNota' => $this->dto->taxNumber[0] ?? '',
+            'serie' => $this->dto->taxSerie,
             'chave' => '',
             'prot' => '',
             'pages' => '500'
@@ -259,6 +259,8 @@ final class Request
 
             if (strpos($contentType, 'application/zip') !== false) {
                 echo 'Os arquivos foram baixados em: ' . realpath($filepath);
+                echo '<br />';
+                echo '<br />';
             } else {
                 $content = file_get_contents($filepath);
                 unlink($filepath);

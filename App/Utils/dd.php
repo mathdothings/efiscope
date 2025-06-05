@@ -10,6 +10,7 @@ function dd(mixed $value): void
         padding: 1rem;
         background-color: #252526;
         color: yellow;
+        white-space: pre-line;
     ">';
     var_dump($value);
     echo '<pre />';

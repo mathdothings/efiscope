@@ -23,6 +23,11 @@ $ieEmit = $_POST['ie-emit'] ?? '';
 $contribuitionType = $_POST['contribuition-type'] ?? '';
 $dateStart = $_POST['date-start'] ?? '';
 $dateEnd = $_POST['date-end'] ?? '';
+$taxNumber = array_filter(
+    preg_split('/\R/', trim(str_replace("'", '', $_POST['tax-number'] ?? ''))),
+    fn($item) => $item !== ''
+);
+$taxSerie = $_POST['tax-serie'] ?? '';
 $keysList = array_filter(
     preg_split('/\R/', trim(str_replace("'", '', $_POST['keys-list'] ?? ''))),
     fn($item) => $item !== ''
@@ -39,6 +44,8 @@ $data = [
     'contribuition-type' => $contribuitionType,
     'dateStart' => $dateStart,
     'dateEnd' => $dateEnd,
+    'taxNumber' => $taxNumber,
+    'taxSerie' => $taxSerie,
     'keysList' => $keysList,
     'start' => $start
 ];
@@ -137,6 +144,12 @@ $data = [
                 <label for="date-end">Data Final</label>
                 <input name="date-end" type="date" value='<?= $_POST['date-end'] ?? '' ?>'>
                 <br>
+                <label for="tax-number">Número da Nota</label>
+                <textarea name="tax-number" pattern="(\d{9}\s*)+"><?=
+                                                                    htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
+                                                                    ?></textarea>
+                <label for="tax-number">Série</label>
+                <input name="tax-serie" type="number" value='<?= $_POST['tax-serie'] ?? '1' ?>'>
                 <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
                                                                     htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
@@ -166,6 +179,24 @@ if (!$start) {
 
 if (count($dto->keysList)) {
     $request->download($dto->keysList);
+    return;
+}
+
+if (count($dto->taxNumber)) {
+    $keys = [];
+    $date = new DateTime()->format('d/m/Y');
+
+    foreach ($dto->taxNumber as $number) {
+        $dto->taxNumber[0] = $number;
+        $response = $request->NFCEAttempt($date);
+        $scrapper->date = $date;
+        $key = $scrapper->scrap($response);
+        $keys[] = $key[0];
+        sleep(rand(5, 15));
+    }
+    pretty_print($keys);
+    $request->download($keys);
+    return;
 }
 
 // data format dd/mm/yyyy

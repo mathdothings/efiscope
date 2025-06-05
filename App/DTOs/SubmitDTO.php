@@ -20,6 +20,7 @@ final class SubmitDTO
      * @param string $contribuitionType Type of contribution (e.g., "Annual", "Quarterly").
      * @param string $dateStart Start date of the tax period (format: YYYY-MM-DD).
      * @param string $dateEnd End date of the tax period (format: YYYY-MM-DD).
+     * @param array $taxNumber List of tax numbers included in the submission.
      * @param array $keysList List of document keys/references included in the submission.
      * @param int $start Pagination or batch starting index (if applicable).
      */
@@ -32,6 +33,8 @@ final class SubmitDTO
         public readonly string $contribuitionType,
         public readonly string $dateStart,
         public readonly string $dateEnd,
+        public array $taxNumber,
+        public readonly string $taxSerie,
         public readonly array $keysList,
         public readonly int $start
     ) {}
@@ -56,6 +59,8 @@ final class SubmitDTO
             contribuitionType: $data['contribuition-type'] ?? '',
             dateStart: $data['dateStart'] ?? '',
             dateEnd: $data['dateEnd'] ?? '',
+            taxNumber: $data['taxNumber'] ?? [],
+            taxSerie: $data['taxSerie'] ?? '',
             keysList: $data['keysList'] ?? [],
             start: (int) ($data['start'] ?? 0)
         );
