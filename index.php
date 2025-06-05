@@ -42,10 +42,6 @@ $data = [
     'keysList' => $keysList,
     'start' => $start
 ];
-
-$dto = SubmitDTO::create($data);
-$scrapper = new Scrapper($dto);
-$request = new Request($dto);
 ?>
 
 <!DOCTYPE html>
@@ -148,6 +144,9 @@ $request = new Request($dto);
 </html>
 
 <?php
+$dto = SubmitDTO::create($data);
+$scrapper = new Scrapper($dto);
+$request = new Request($dto);
 
 $final = (int) new DateTime($dto->dateEnd)->format('d') - (int) new DateTime($dto->dateStart)->format('d') + 1;
 $initial = (int) new DateTime($dto->dateStart)->format('d');
@@ -172,6 +171,7 @@ for ($i = 0; $i < $final; $i++) {
     $dates[] = $dt;
 }
 
+$sum = [];
 foreach ($dates as $date) {
     $keys = [];
 
@@ -187,7 +187,17 @@ foreach ($dates as $date) {
         $keys = $scrapper->scrap($response);
     }
 
+    if (count($keys) <= 0) {
+        continue;
+    }
+
     $request->date = date_convert($date);
     $request->download($keys);
+    $sum = array_merge($sum, $keys);
     sleep(rand(5, 15));
 }
+
+echo '<br />';
+echo '<br />';
+echo '<h3 style="background-color: #2B7FFF; color: white; padding: 1rem;">' . 'A operação finalizou, foram encontrados: ' . '<span style="font-size: 1.15rem; color: #00C951;">' . count($sum) . '</span>' . ' resultados' . '</h3>';
+echo '<br />';

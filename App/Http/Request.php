@@ -24,12 +24,12 @@ final class Request
         $session = $this->dto->session;
         $user = $this->dto->user;
         $datasQuery =  http_build_query([
-            $date,
-            $date
+            'dataIni' => $date,
+            'dataFim' => $date
         ]);
         $tipoContribuinte = $this->dto->contribuitionType;
         $ieEmitente = $this->dto->ieEmit;
-        $cookie = $this->dto->jsSession;
+        $cookie = 'JSESSIONID=' . $this->dto->jsSession;
 
         $origin = 'Origin: https://nfeconsulta.sefaz.pe.gov.br:444';
         $refer = "Referer: https://nfeconsulta.sefaz.pe.gov.br:444/nfe-web/downloadNfe?_nmJanelaAuxiliar=janelaAuxiliar&in_janela_auxiliar=S&id_sessao=$session&cd_usuario=$user";
@@ -239,7 +239,8 @@ final class Request
             . DIRECTORY_SEPARATOR
             . $prefix
             . new DateTime($this->date, timezone: new DateTimeZone('America/Sao_Paulo'))->format('d-m-Y')
-            . new DateTime(timezone: new DateTimeZone('America/Sao_Paulo'))->format('__H-i-s')
+            . '_downloaded_'
+            . new DateTime(timezone: new DateTimeZone('America/Sao_Paulo'))->format('d-m-Y_H-i-s')
             . '.zip';
 
         $fileHandle = fopen($filepath, 'w');
