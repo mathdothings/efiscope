@@ -25,7 +25,7 @@ final class Scrapper
 
         $amount = $dom->querySelectorAll('.thickbox');
         $elements = $dom->querySelectorAll('.tabelaCadastroLinha');
-        echo '<p>Total: ' . $amount->length . ' (' . $this->date . ')' . '</p>';
+        echo '<p>' . $this->date . ' (' . $amount->length . ')' . '</p>';
 
         if ($amount->length === 0) return [];
         if ($amount->length === 500) echo '<h3 style="background-color: #f52b37; color: white; padding: 1rem;"> Houveram mais de 500 registros em ' . $this->date . '</h1>';

@@ -53,8 +53,16 @@ $data = [
     <title>Baixar NFe e NFCE | e-Fisco PE</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
+        *,
+        *::after,
+        *::before {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         h3 {
@@ -78,7 +86,7 @@ $data = [
         }
 
         #submit-button:hover {
-            background-color: #51a2ff;
+            background-color: mediumpurple;
         }
 
         #session-error {
@@ -91,7 +99,7 @@ $data = [
 
 <body style="font-family: monospace;">
     <div style="display: flex; align-items: center; flex-direction: column;">
-        <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 10px; padding: 2rem;">
+        <form method="post" class="container" style="border: 1px solid #ccc; box-shadow: 0 5px 10px 0 lightgray; border-radius: 10px; padding: 1rem;">
             <fieldset>
                 <legend>Tipo de Nota:</legend>
                 <div>
@@ -107,7 +115,7 @@ $data = [
             <input name="session" type="text" required value='<?= $_POST['session'] ?? '' ?>'>
             <label for="js-session">JS Sessão</label>
             <input name="js-session" type="text" required value='<?= $_POST['js-session'] ?? '' ?>'>
-            <label for="cd-user">Cd. Usuário</label>
+            <label for="cd-user">Código do Usuário</label>
             <input name="cd-user" type="text" required value='<?= $_POST['cd-user'] ?? '' ?>'>
             <label for="ie-emit">I.E. Emitente</label>
             <input name="ie-emit" type="text" required value='<?= $_POST['ie-emit'] ?? '' ?>'>
@@ -199,5 +207,5 @@ foreach ($dates as $date) {
 
 echo '<br />';
 echo '<br />';
-echo '<h3 style="background-color: #2B7FFF; color: white; padding: 1rem;">' . 'A operação finalizou, foram encontrados: ' . '<span style="font-size: 1.15rem; color: #00C951;">' . count($sum) . '</span>' . ' resultados' . '</h3>';
+echo '<p style="text-align: center; background-color: #00C951; color: white; padding: 1rem; border-radius: 10px;">' . 'A operação finalizou, foram encontrados: '  . count($sum) . ' resultados' . '</p>';
 echo '<br />';
