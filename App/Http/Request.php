@@ -238,7 +238,8 @@ final class Request
         $filepath = $downloadDir
             . DIRECTORY_SEPARATOR
             . $prefix
-            . new DateTime($this->date, timezone: new DateTimeZone('America/Sao_Paulo'))->format('d-m-Y_H-i-s')
+            . new DateTime($this->date, timezone: new DateTimeZone('America/Sao_Paulo'))->format('d-m-Y')
+            . new DateTime(timezone: new DateTimeZone('America/Sao_Paulo'))->format('__H-i-s')
             . '.zip';
 
         $fileHandle = fopen($filepath, 'w');

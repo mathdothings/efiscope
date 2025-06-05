@@ -2,11 +2,12 @@
 
 require_once __DIR__ . '/App/Utils/dd.php';
 require_once __DIR__ . '/App/Utils/pretty_print.php';
+require_once __DIR__ . '/App/Utils/date_convert.php';
 require_once __DIR__ . '/App/DTOs/SubmitDTO.php';
 require_once __DIR__ . '/App/Http/Request.php';
 require_once __DIR__ . '/App/Scrapper/Scrapper.php';
-require_once __DIR__ . '/.bak/download_test.php';
 
+use function App\Utils\date_convert;
 use function App\Utils\dd;
 use function App\Utils\pretty_print;
 
@@ -142,55 +143,51 @@ $request = new Request($dto);
         </form>
     </div>
     <br>
-    <?php
-
-    $final = (int) new DateTime($dto->dateEnd)->format('d') - (int) new DateTime($dto->dateStart)->format('d') + 1;
-    $initial = (int) new DateTime($dto->dateStart)->format('d');
-    $dates = [];
-
-    if (!$start) {
-        return;
-    }
-
-    if (count($dto->keysList)) {
-        $request->download($dto->keysList);
-    }
-
-    // data format dd/mm/yyyy
-    for ($i = 0; $i < $final; $i++) {
-        $d = $initial;
-        $d += $i;
-        $day = $d > 9 ? $d : '0' . $d;
-        $parts = explode('-', $dto->dateEnd);
-        $dt = "$day/$parts[1]/$parts[0]";
-
-        $dates[] = $dt;
-    }
-
-    foreach ($dates as $date) {
-        $keys = [];
-
-        if ($dto->taxType === 'nfe') {
-            $response = $request->NFEAttempt($date);
-            $scrapper->date = $date;
-            $keys = $scrapper->scrap($response);
-        }
-
-        if ($dto->taxType === 'nfce') {
-            $response = $request->NFCEAttempt($date);
-            $scrapper->date = $date;
-            $keys = $scrapper->scrap($response);
-        }
-
-        $parts = explode('/', $date);
-        $downloadDate = "$parts[2]-$parts[1]-$parts[0]";
-        $request->date = $downloadDate;
-        $request->download($keys);
-        // download($dto, $keys);
-        // sleep(rand(5, 15));
-    }
-
-    ?>
 </body>
 
 </html>
+
+<?php
+
+$final = (int) new DateTime($dto->dateEnd)->format('d') - (int) new DateTime($dto->dateStart)->format('d') + 1;
+$initial = (int) new DateTime($dto->dateStart)->format('d');
+$dates = [];
+
+if (!$start) {
+    return;
+}
+
+if (count($dto->keysList)) {
+    $request->download($dto->keysList);
+}
+
+// data format dd/mm/yyyy
+for ($i = 0; $i < $final; $i++) {
+    $d = $initial;
+    $d += $i;
+    $day = $d > 9 ? $d : '0' . $d;
+    $parts = explode('-', $dto->dateEnd);
+    $dt = "$day/$parts[1]/$parts[0]";
+
+    $dates[] = $dt;
+}
+
+foreach ($dates as $date) {
+    $keys = [];
+
+    if ($dto->taxType === 'nfe') {
+        $response = $request->NFEAttempt($date);
+        $scrapper->date = $date;
+        $keys = $scrapper->scrap($response);
+    }
+
+    if ($dto->taxType === 'nfce') {
+        $response = $request->NFCEAttempt($date);
+        $scrapper->date = $date;
+        $keys = $scrapper->scrap($response);
+    }
+
+    $request->date = date_convert($date);
+    $request->download($keys);
+    sleep(rand(5, 15));
+}

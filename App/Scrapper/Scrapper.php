@@ -27,7 +27,7 @@ final class Scrapper
         $elements = $dom->querySelectorAll('.tabelaCadastroLinha');
         echo '<p>Total: ' . $amount->length . ' (' . $this->date . ')' . '</p>';
 
-        if ($amount->length === 500) echo '<h3 style="background-color: #f8a1a2; color: #f52b37; padding: 1rem;"> Houveram mais de 500 registros em ' . $this->dto->dateStart . '</h1>';
+        if ($amount->length === 500) echo '<h3 style="background-color: #f52b37; color: white; padding: 1rem;"> Houveram mais de 500 registros em ' . $this->date . '</h1>';
 
         $chavesDeAcesso = [];
         $chaves = [];
