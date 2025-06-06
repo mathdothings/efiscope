@@ -37,10 +37,10 @@ $start = isset($_POST['start']) ? true : false;
 
 $data = [
     'taxType' => $taxType,
-    'session' => $session,
-    'jsSession' => $jsSession,
-    'user' => $user,
-    'ieEmit' => $ieEmit,
+    'session' => trim($session),
+    'jsSession' => trim($jsSession),
+    'user' => trim($user),
+    'ieEmit' => trim($ieEmit),
     'contribuition-type' => $contribuitionType,
     'dateStart' => $dateStart,
     'dateEnd' => $dateEnd,
@@ -119,13 +119,13 @@ $data = [
                 </div>
             </fieldset>
             <label for="session">ID Sessão</label>
-            <input name="session" type="text" required value='<?= $_POST['session'] ?? '' ?>'>
+            <input name="session" type="text" required value='<?= $session ?? '' ?>'>
             <label for="js-session">JS Sessão</label>
-            <input name="js-session" type="text" required value='<?= $_POST['js-session'] ?? '' ?>'>
+            <input name="js-session" type="text" required value='<?= $jsSession ?? '' ?>'>
             <label for="cd-user">Código do Usuário</label>
-            <input name="cd-user" type="text" required value='<?= $_POST['cd-user'] ?? '' ?>'>
+            <input name="cd-user" type="text" required value='<?= $user ?? '' ?>'>
             <label for="ie-emit">I.E. Emitente</label>
-            <input name="ie-emit" type="text" required value='<?= $_POST['ie-emit'] ?? '' ?>'>
+            <input name="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>'>
             <fieldset>
                 <legend>Tipo de contribuinte:</legend>
                 <div>
@@ -140,16 +140,16 @@ $data = [
             <br>
             <div class="small-input">
                 <label for="date-start">Data Inicial</label>
-                <input name="date-start" type="date" value='<?= $_POST['date-start'] ?? '' ?>'>
+                <input name="date-start" type="date" value='<?= $dateStart ?? '' ?>'>
                 <label for="date-end">Data Final</label>
-                <input name="date-end" type="date" value='<?= $_POST['date-end'] ?? '' ?>'>
+                <input name="date-end" type="date" value='<?= $dateEnd ?? '' ?>'>
                 <br>
                 <label for="tax-number">Número da Nota</label>
                 <textarea name="tax-number" pattern="(\d{9}\s*)+"><?=
                                                                     htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
                                                                     ?></textarea>
                 <label for="tax-number">Série</label>
-                <input name="tax-serie" type="number" value='<?= $_POST['tax-serie'] ?? '1' ?>'>
+                <input name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
                 <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
                                                                     htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
@@ -177,8 +177,14 @@ if (!$start) {
     return;
 }
 
+$sum = [];
+
 if (count($dto->keysList)) {
     $request->download($dto->keysList);
+    $sum = $dto->keysList;
+
+    show_success_message($sum);
+
     return;
 }
 
@@ -191,15 +197,18 @@ if (count($dto->taxNumber)) {
         $response = $request->NFCEAttempt($date);
         $scrapper->date = $date;
         $key = $scrapper->scrap($response);
+        $sum = array_merge($sum, $key);
         $keys[] = $key[0];
         sleep(rand(5, 15));
     }
-    pretty_print($keys);
+
     $request->download($keys);
+    show_success_message($sum);
+
     return;
 }
 
-// data format dd/mm/yyyy
+// date format dd/mm/yyyy
 for ($i = 0; $i < $final; $i++) {
     $d = $initial;
     $d += $i;
@@ -210,7 +219,6 @@ for ($i = 0; $i < $final; $i++) {
     $dates[] = $dt;
 }
 
-$sum = [];
 foreach ($dates as $date) {
     $keys = [];
 
@@ -235,8 +243,12 @@ foreach ($dates as $date) {
     $sum = array_merge($sum, $keys);
     sleep(rand(5, 15));
 }
+show_success_message($sum);
 
-echo '<br />';
-echo '<br />';
-echo '<p style="text-align: center; background-color: #00C951; color: white; padding: 1rem; border-radius: 10px;">' . 'A operação finalizou, foram encontrados: '  . count($sum) . ' resultados' . '</p>';
-echo '<br />';
+function show_success_message(array $amount)
+{
+    echo '<br />';
+    echo '<br />';
+    echo '<p style="text-align: center; background-color: #00C951; color: white; padding: 1rem; border-radius: 10px;">' . 'Foram encontrados: '  . count($amount) . ' resultados!' . '</p>';
+    echo '<br />';
+}
