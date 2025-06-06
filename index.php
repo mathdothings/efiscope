@@ -143,13 +143,14 @@ $data = [
                 <input name="date-start" type="date" value='<?= $dateStart ?? '' ?>'>
                 <label for="date-end">Data Final</label>
                 <input name="date-end" type="date" value='<?= $dateEnd ?? '' ?>'>
-                <br>
+                <br />
                 <label for="tax-number">Número da Nota</label>
                 <textarea name="tax-number" pattern="(\d{9}\s*)+"><?=
                                                                     htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
                                                                     ?></textarea>
                 <label for="tax-number">Série</label>
                 <input name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
+                <br />
                 <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
                                                                     htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
