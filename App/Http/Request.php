@@ -252,20 +252,22 @@ final class Request
             echo 'Error:' . curl_error($curlHandler);
             fclose($fileHandle);
             unlink($filepath);
-        } else {
-            fclose($fileHandle);
+        }
 
-            $contentType = curl_getinfo($curlHandler, CURLINFO_CONTENT_TYPE);
+        fclose($fileHandle);
+        $contentType = curl_getinfo($curlHandler, CURLINFO_CONTENT_TYPE);
 
-            if (strpos($contentType, 'application/zip') !== false) {
-                echo 'Os arquivos foram baixados em: ' . realpath($filepath);
-                echo '<br />';
-                echo '<br />';
-            } else {
-                $content = file_get_contents($filepath);
-                unlink($filepath);
-                echo "Response:\n" . htmlspecialchars($content);
-            }
+        // 22 bytes represents an empty minimal .zip file
+        if (strpos($contentType, 'application/zip') !== false && filesize($filepath) > 22) {
+            echo 'Os arquivos foram baixados em: ' . realpath($filepath);
+            echo '<br />';
+            echo '<br />';
+        }
+
+        if (strpos($contentType, 'application/zip') === false) {
+            $content = file_get_contents($filepath);
+            unlink($filepath);
+            echo "Response:\n" . htmlspecialchars($content);
         }
 
         curl_close($curlHandler);
