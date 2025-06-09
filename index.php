@@ -3,17 +3,21 @@
 require_once __DIR__ . '/App/Utils/dd.php';
 require_once __DIR__ . '/App/Utils/pretty_print.php';
 require_once __DIR__ . '/App/Utils/date_convert.php';
+require_once __DIR__ . '/App/Utils/unzip.php';
+
 require_once __DIR__ . '/App/DTOs/SubmitDTO.php';
 require_once __DIR__ . '/App/Http/Request.php';
 require_once __DIR__ . '/App/Scrapper/Scrapper.php';
 
-use function App\Utils\date_convert;
-use function App\Utils\dd;
-use function App\Utils\pretty_print;
-
-use App\DTOs\FormSubmission\SubmitDTO;
 use App\Http\Request;
 use App\Scrapper\Scrapper;
+use App\DTOs\FormSubmission\SubmitDTO;
+
+use function App\Utils\dd;
+use function App\Utils\date_convert;
+use function App\Utils\pretty_print;
+use function App\Utils\unzip;
+
 
 $taxType = $_POST['tax-type'] ?? '';
 $session = $_POST['session'] ?? '';
@@ -130,7 +134,9 @@ foreach ($dates as $date) {
     $sum = array_merge($sum, $keys);
     sleep(rand(5, 15));
 }
+
 show_success_message($sum);
+unzip();
 
 function show_success_message(array $amount)
 {
