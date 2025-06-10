@@ -16,7 +16,8 @@
         }
 
         body {
-            font-size: 0.9rem;
+            font-size: 1rem;
+            height: 100vh;
         }
 
         h3 {
@@ -37,6 +38,7 @@
         #submit-button {
             background-color: #2b7fff;
             color: white;
+            margin: auto;
         }
 
         #submit-button:hover {
