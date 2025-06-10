@@ -35,6 +35,10 @@
             width: 70%;
         }
 
+        #tax-serie {
+            width: 20%;
+        }
+
         #submit-button {
             background-color: #2b7fff;
             color: white;
@@ -109,7 +113,7 @@
                                                                     htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
                                                                     ?></textarea>
                 <label for="tax-number">Série</label>
-                <input name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
+                <input id="tax-serie" name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
                 <br />
                 <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
