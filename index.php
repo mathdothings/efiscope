@@ -18,7 +18,6 @@ use function App\Utils\date_convert;
 use function App\Utils\pretty_print;
 use function App\Utils\unzip;
 
-
 $taxType = $_POST['tax-type'] ?? '';
 $session = $_POST['session'] ?? '';
 $jsSession = $_POST['js-session'] ?? '';
