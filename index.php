@@ -4,6 +4,7 @@ require_once __DIR__ . '/App/Utils/dd.php';
 require_once __DIR__ . '/App/Utils/pretty_print.php';
 require_once __DIR__ . '/App/Utils/date_convert.php';
 require_once __DIR__ . '/App/Utils/unzip.php';
+require_once __DIR__ . '/App/Utils/delete_all_files.php';
 
 require_once __DIR__ . '/App/DTOs/SubmitDTO.php';
 require_once __DIR__ . '/App/Http/Request.php';
@@ -15,6 +16,7 @@ use App\DTOs\FormSubmission\SubmitDTO;
 
 use function App\Utils\dd;
 use function App\Utils\date_convert;
+use function App\Utils\delete_all_files;
 use function App\Utils\pretty_print;
 use function App\Utils\unzip;
 
@@ -136,6 +138,7 @@ foreach ($dates as $date) {
 
 show_success_message($sum);
 unzip();
+delete_all_files();
 
 function show_success_message(array $amount)
 {
