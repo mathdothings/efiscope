@@ -76,7 +76,8 @@ if (count($dto->keysList)) {
     $sum = $dto->keysList;
 
     show_success_message($sum);
-
+    unzip();
+    delete_all_files();
     return;
 }
 
@@ -96,7 +97,8 @@ if (count($dto->taxNumber)) {
 
     $request->download($keys);
     show_success_message($sum);
-
+    unzip();
+    delete_all_files();
     return;
 }
 
