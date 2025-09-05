@@ -9,6 +9,7 @@ Desenvolvido por @ mathdothings
 
 Requerimentos:
     
+    PHP 8.4
     cURL
     Zip Archive
     Dom\HTMLDocument
