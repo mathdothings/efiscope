@@ -78,7 +78,7 @@ if (count($dto->keysList)) {
     show_success_message($sum);
     unzip();
     delete_all_files();
-    return;
+    die;
 }
 
 if (count($dto->taxNumber)) {

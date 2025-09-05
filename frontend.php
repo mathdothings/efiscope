@@ -15,6 +15,11 @@
             padding: 0;
         }
 
+        *::selection {
+            color: white;
+            background-color: #3DADE9;
+        }
+
         body {
             font-size: 1rem;
             height: 100vh;
@@ -70,7 +75,7 @@
 
 <body style="font-family: monospace;">
     <div style="display: flex; align-items: center; flex-direction: column;">
-        <form method="post" class="container" style="border: 1px solid #ccc; box-shadow: 0 5px 10px 0 lightgray; border-radius: 10px; padding: 1rem;">
+        <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 10px; padding: 1rem;">
             <fieldset>
                 <legend>Tipo de Nota:</legend>
                 <div>
