@@ -126,7 +126,7 @@ for ($i = 0; $i < $final; $i++) {
     $dates[] = $dt;
 }
 
-foreach ($dates as $date) {
+foreach ($dates as $index => $date) {
     $keys = [];
 
     if ($dto->taxType === 'nfe') {
@@ -148,7 +148,10 @@ foreach ($dates as $date) {
     $request->date = date_convert($date);
     $request->download($keys);
     $sum = array_merge($sum, $keys);
-    sleep(rand(5, 15));
+
+    if ($index + 1 !== count($dates)) {
+        sleep(rand(5));
+    }
 }
 
 show_success_message($sum);
