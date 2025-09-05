@@ -38,6 +38,11 @@ $keysList = array_filter(
     fn($item) => $item !== ''
 );
 
+if (count($keysList)) {
+    $taxType = 'nfe';
+    $message = 'Automaticamente alterado o tipo de nota para NFE para baixar pelas Chaves de Acesso!';
+}
+
 $start = isset($_POST['start']) ? true : false;
 
 $data = [
@@ -146,6 +151,6 @@ function show_success_message(array $amount)
 {
     echo '<br />';
     echo '<br />';
-    echo '<p style="text-align: center; background-color: #00C951; color: white; padding: 1rem; border-radius: 10px;">' . 'Foram encontrados: '  . count($amount) . ' resultados!' . '</p>';
+    echo '<p style="text-align: center; background-color: #F0FDF4; color: #05DF72; padding: 0.5rem 1rem; border: 1px solid #B9F8CF; border-radius: 10px;">' . 'Foram encontrados: '  . count($amount) . ' resultados!' . '</p>';
     echo '<br />';
 }

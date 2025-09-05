@@ -26,7 +26,7 @@ final class Request
         ]);
         $tipoContribuinte = $this->dto->contribuitionType;
         $ieEmitente = $this->dto->ieEmit;
-        $cookie = 'JSESSIONID=' . $this->dto->jsSession;
+        $cookie = $this->dto->jsSession;
 
         $origin = 'Origin: https://nfeconsulta.sefaz.pe.gov.br:444';
         $refer = "Referer: https://nfeconsulta.sefaz.pe.gov.br:444/nfe-web/downloadNfe?_nmJanelaAuxiliar=janelaAuxiliar&in_janela_auxiliar=S&id_sessao=$session&cd_usuario=$user";
@@ -116,7 +116,7 @@ final class Request
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $raw_data,
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_COOKIE => 'JSESSIONID=' . $this->dto->jsSession,
+            CURLOPT_COOKIE => $this->dto->jsSession,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 30,
@@ -179,7 +179,7 @@ final class Request
         ];
 
         curl_setopt($curlHandler, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curlHandler, CURLOPT_COOKIE, "JSESSIONID=$jsSession");
+        curl_setopt($curlHandler, CURLOPT_COOKIE, $jsSession);
 
         $postData = $taxType === 'nfe' ? [
             'chamadaInterna' => 'true',
@@ -256,6 +256,8 @@ final class Request
 
         // 22 bytes represents an empty minimal .zip file
         if (strpos($contentType, 'application/zip') !== false && filesize($filepath) > 22) {
+            echo '<br />';
+            echo '<hr />';
             echo 'Os arquivos foram baixados em: ' . realpath($filepath);
             echo '<br />';
             echo '<br />';
@@ -264,7 +266,6 @@ final class Request
         if (strpos($contentType, 'application/zip') === false) {
             $content = file_get_contents($filepath);
             unlink($filepath);
-            echo "Response:\n" . htmlspecialchars($content);
         }
 
         curl_close($curlHandler);

@@ -13,8 +13,6 @@ function dd(mixed $value): void
         white-space: pre-line;
     ">';
     var_dump($value);
-    echo '<pre />';
-    echo '<br />';
 
     die;
 }

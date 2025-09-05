@@ -25,6 +25,7 @@ final class Scrapper
 
         $amount = $dom->querySelectorAll('.thickbox');
         $elements = $dom->querySelectorAll('.tabelaCadastroLinha');
+        echo '<br />';
         echo '<hr />';
         echo '<p>' . $this->date . ' (' . $amount->length . ')' . '</p>';
 
@@ -37,7 +38,6 @@ final class Scrapper
         echo '<details>';
         echo '<summary>Detalhes</summary>';
         echo '<table>';
-        echo '    <caption>Informações</caption>';
         echo '    <thead>';
         echo '        <tr>';
         echo '            <th>Chave de Acesso</th>';

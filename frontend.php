@@ -22,7 +22,6 @@
 
         body {
             font-size: 1rem;
-            height: 100vh;
         }
 
         h3 {
@@ -38,6 +37,15 @@
         .container {
             display: grid;
             width: 70%;
+        }
+
+        .msg {
+            background-color: #EFF6FF;
+            border: 1px solid #BEDBFF;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            width: 100%;
         }
 
         #tax-serie {
@@ -75,6 +83,7 @@
 
 <body style="font-family: monospace;">
     <div style="display: flex; align-items: center; flex-direction: column;">
+        <p class="msg"><?= $message ?></p>
         <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 10px; padding: 1rem;">
             <fieldset>
                 <legend>Tipo de Nota:</legend>
@@ -129,7 +138,6 @@
             <input type="submit" id="submit-button" name="start" value="Iniciar" class="small-input"></input>
         </form>
     </div>
-    <br>
 </body>
 
 </html>
