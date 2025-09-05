@@ -42,6 +42,7 @@
         .msg {
             background-color: #EFF6FF;
             border: 1px solid #BEDBFF;
+            color: #51A2FF;
             margin-bottom: 1rem;
             padding: 0.5rem 1rem;
             border-radius: 10px;
@@ -83,7 +84,10 @@
 
 <body style="font-family: monospace;">
     <div style="display: flex; align-items: center; flex-direction: column;">
-        <p class="msg"><?= $message ?></p>
+        <?php if ($message) {
+        ?>
+            <p class="msg"><?= $message ?></p>
+        <?php } ?>
         <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 10px; padding: 1rem;">
             <fieldset>
                 <legend>Tipo de Nota:</legend>
@@ -122,17 +126,17 @@
                 <label for="date-end">Data Final</label>
                 <input name="date-end" type="date" value='<?= $dateEnd ?? '' ?>'>
                 <br />
+                <label for="keys-list">Chaves de Acesso</label>
+                <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
+                                                                    htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
+                                                                    ?></textarea>
+                <br />
                 <label for="tax-number">Número da Nota</label>
                 <textarea name="tax-number" pattern="(\d{9}\s*)+"><?=
                                                                     htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
                                                                     ?></textarea>
                 <label for="tax-number">Série</label>
                 <input id="tax-serie" name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
-                <br />
-                <label for="keys-list">Chaves de Acesso</label>
-                <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
-                                                                    htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
-                                                                    ?></textarea>
             </div>
             <br>
             <input type="submit" id="submit-button" name="start" value="Iniciar" class="small-input"></input>
