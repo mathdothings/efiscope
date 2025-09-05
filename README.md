@@ -1,10 +1,13 @@
 Desenvolvido por @ mathdothings
-    - Jhonata Rodrigues
+    
+    Jhonata Rodrigues
+    jhonata.prodrigues@gmail.com
 
 Requerimentos:
-    - cURL
-    - Zip Archive
-    - Dom\HTMLDocument
+    
+    cURL
+    Zip Archive
+    Dom\HTMLDocument
 
 Para iniciar um servidor local da aplicação na porta 9000:
 ```bash
