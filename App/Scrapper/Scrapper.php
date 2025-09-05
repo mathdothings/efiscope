@@ -18,7 +18,7 @@ final class Scrapper
 
         if (strpos($error->innerHTML, 'ERRO')) {
             echo '<div id="session-error">';
-            echo '<h3>Erro ao validar sessão!</h3>';
+            echo '<p style="text-align: center; background-color: #FFE2E2; color: #FB2C36; padding: 0.5rem 1rem; border: 1px solid #FFA2A2; border-radius: 10px;">Erro ao validar sessão!</p>';
             echo '</div>';
             die;
         }
