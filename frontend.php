@@ -104,16 +104,16 @@
             </fieldset>
             <br />
             <label for="session">ID Sessão</label>
-            <input name="session" type="text" required value='<?= $session ?? '' ?>'>
+            <input name="session" id="session" type="text" required value='<?= $session ?? '' ?>'>
             <br />
             <label for="js-session">JS Sessão</label>
-            <input name="js-session" type="text" required value='<?= $jsSession ?? '' ?>'>
+            <input name="js-session" id="js-session" type="text" required value='<?= $jsSession ?? '' ?>'>
             <br />
             <label for="cd-user">Código do Usuário</label>
-            <input name="cd-user" type="text" required value='<?= $user ?? '' ?>'>
+            <input name="cd-user" id="cd-user" type="text" required value='<?= $user ?? '' ?>'>
             <br />
             <label for="ie-emit">I.E. Emitente</label>
-            <input name="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>'>
+            <input name="ie-emit" id="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>'>
             <br />
             <fieldset>
                 <legend>Tipo de contribuinte:</legend>
@@ -129,20 +129,20 @@
             <br>
             <div class="small-input">
                 <label for="date-start">Data Inicial</label>
-                <input name="date-start" type="date" value='<?= $dateStart ?? '' ?>'>
+                <input name="date-start" id="date-start" type="date" value='<?= $dateStart ?? '' ?>'>
                 <label for="date-end">Data Final</label>
-                <input name="date-end" type="date" value='<?= $dateEnd ?? '' ?>'>
+                <input name="date-end" id="date-end" type="date" value='<?= $dateEnd ?? '' ?>'>
                 <br />
                 <label for="keys-list">Chaves de Acesso</label>
-                <textarea name="keys-list" pattern="(\d{44}\s*)+"><?=
-                                                                    htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
-                                                                    ?></textarea>
+                <textarea name="keys-list" id="keys-list" pattern="(\d{44}\s*)+"><?=
+                                                                                    htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
+                                                                                    ?></textarea>
                 <br />
                 <label for="tax-number">Número da Nota</label>
-                <textarea name="tax-number" pattern="(\d{9}\s*)+"><?=
-                                                                    htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
-                                                                    ?></textarea>
-                <label for="tax-number">Série</label>
+                <textarea name="tax-number" id="tax-number" pattern="(\d{9}\s*)+"><?=
+                                                                                    htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
+                                                                                    ?></textarea>
+                <label for="tax-serie">Série</label>
                 <input id="tax-serie" name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
             </div>
             <br>
