@@ -22,6 +22,7 @@
 
         body {
             font-size: 1rem;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         h3 {
@@ -32,6 +33,12 @@
             padding: 1rem;
             width: 50%;
             border-radius: 10px;
+        }
+
+        input[type="text"],
+        textarea,
+        td {
+            font-family: 'Courier New', Courier, monospace;
         }
 
         .container {
@@ -60,7 +67,7 @@
         }
 
         #submit-button:hover {
-            background-color: mediumpurple;
+            background-color: royalblue;
         }
 
         #session-error {
@@ -70,11 +77,6 @@
         }
 
         @media only screen and (max-width: 500px) {
-
-            body {
-                font-size: 1.25rem;
-            }
-
             .container {
                 width: 100%;
             }
@@ -82,7 +84,7 @@
     </style>
 </head>
 
-<body style="font-family: monospace;">
+<body>
     <div style="display: flex; align-items: center; flex-direction: column;">
         <?php if ($message) {
         ?>
@@ -100,14 +102,19 @@
                     <label for="nfce">NFCE (Cupom)</label>
                 </div>
             </fieldset>
+            <br />
             <label for="session">ID Sessão</label>
             <input name="session" type="text" required value='<?= $session ?? '' ?>'>
+            <br />
             <label for="js-session">JS Sessão</label>
             <input name="js-session" type="text" required value='<?= $jsSession ?? '' ?>'>
+            <br />
             <label for="cd-user">Código do Usuário</label>
             <input name="cd-user" type="text" required value='<?= $user ?? '' ?>'>
+            <br />
             <label for="ie-emit">I.E. Emitente</label>
             <input name="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>'>
+            <br />
             <fieldset>
                 <legend>Tipo de contribuinte:</legend>
                 <div>
