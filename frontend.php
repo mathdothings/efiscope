@@ -104,10 +104,10 @@
 
 <body>
     <div class="wrapper">
-        <?php if ($message) {
+        <?php if (isset($message)) {
+            echo "<p class='msg'>{$message}</p>";
+        }
         ?>
-            <p class="msg"><?= $message ?></p>
-        <?php } ?>
         <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 6px; padding: 1rem;">
             <fieldset>
                 <legend>Tipo de nota</legend>
