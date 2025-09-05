@@ -23,6 +23,7 @@
         body {
             font-size: 1rem;
             font-family: Arial, Helvetica, sans-serif;
+            margin: 10px auto;
         }
 
         h3 {
@@ -32,7 +33,7 @@
             color: white;
             padding: 1rem;
             width: 50%;
-            border-radius: 10px;
+            border-radius: 6px;
         }
 
         input[type="text"],
@@ -41,9 +42,20 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
+        fieldset {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
         .container {
             display: grid;
             width: 70%;
+        }
+
+        .wrapper {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
         }
 
         .msg {
@@ -52,7 +64,7 @@
             color: #51A2FF;
             margin-bottom: 1rem;
             padding: 0.5rem 1rem;
-            border-radius: 10px;
+            border-radius: 6px;
             width: 100%;
         }
 
@@ -81,19 +93,24 @@
             .container {
                 width: 100%;
             }
+
+            fieldset {
+                display: grid;
+                grid-template-columns: repeat(1, 1fr);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div style="display: flex; align-items: center; flex-direction: column;">
+    <div class="wrapper">
         <?php if ($message) {
         ?>
             <p class="msg"><?= $message ?></p>
         <?php } ?>
-        <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 10px; padding: 1rem;">
-            <fieldset style="display: grid; grid-template-columns: repeat(2, 1fr);">
-                <legend>Tipo de Nota:</legend>
+        <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 6px; padding: 1rem;">
+            <fieldset>
+                <legend>Tipo de nota</legend>
                 <div>
                     <input type="radio" id="nfe" name="tax-type" required value="nfe" <?= $taxType === 'nfe' ? 'checked' : '' ?> />
                     <label for="nfe">NFE (Nota Grande)</label>
@@ -110,7 +127,8 @@
             <label for="js-session">JS Sessão</label>
             <input name="js-session" id="js-session" type="text" required value='<?= $jsSession ?? '' ?>'>
             <br />
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+            <fieldset>
+                <legend>Dados do Usuário</legend>
                 <div>
                     <label for="cd-user">Código do Usuário</label>
                     <input name="cd-user" id="cd-user" type="text" required value='<?= $user ?? '' ?>'>
@@ -119,10 +137,10 @@
                     <label for="ie-emit">I.E. Emitente</label>
                     <input name="ie-emit" id="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>'>
                 </div>
-            </div>
+            </fieldset>
             <br />
-            <fieldset style="display: grid; grid-template-columns: repeat(2, 1fr);">
-                <legend>Tipo de contribuinte:</legend>
+            <fieldset>
+                <legend>Tipo de contribuinte</legend>
                 <div>
                     <input type="radio" id="emitente" name="contribuition-type" value="E" <?= $contribuitionType === 'E' ? 'checked' : '' ?> />
                     <label for="emitente">Emitente (Saída)</label>
@@ -134,7 +152,8 @@
             </fieldset>
             <br>
             <div class="small-input">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+                <fieldset>
+                    <legend>Datas</legend>
                     <div>
                         <label for="date-start">Data Inicial</label>
                         <input name="date-start" id="date-start" type="date" value='<?= $dateStart ?? '' ?>'>
@@ -143,7 +162,7 @@
                         <label for="date-end">Data Final</label>
                         <input name="date-end" id="date-end" type="date" value='<?= $dateEnd ?? '' ?>'>
                     </div>
-                </div>
+                </fieldset>
                 <br />
                 <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" id="keys-list" pattern="(\d{44}\s*)+"><?=
