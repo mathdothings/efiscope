@@ -47,15 +47,20 @@
             grid-template-columns: repeat(2, 1fr);
         }
 
+        details {
+            margin: 0;
+        }
+
         .container {
             display: grid;
-            width: 70%;
+            width: max-content
         }
 
         .wrapper {
             display: flex;
             align-items: center;
             flex-direction: column;
+            margin-bottom: 10px;
         }
 
         .msg {
@@ -89,7 +94,7 @@
             align-items: center;
         }
 
-        @media only screen and (max-width: 500px) {
+        @media only screen and (max-width: 600px) {
             .container {
                 width: 100%;
             }

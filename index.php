@@ -150,7 +150,7 @@ foreach ($dates as $index => $date) {
     $sum = array_merge($sum, $keys);
 
     if ($index + 1 !== count($dates)) {
-        sleep(rand(5));
+        sleep(rand(3, 5));
     }
 }
 
@@ -160,6 +160,5 @@ delete_all_files();
 
 function show_success_message(array $amount)
 {
-    echo '<br />';
     echo '<p style="text-align: center; background-color: #F0FDF4; color: #00C951; padding: 0.5rem 1rem; border: 1px solid #B9F8CF; border-radius: 6px;">' . 'Foram encontrados: '  . count($amount) . ' resultados!' . '</p>';
 }
