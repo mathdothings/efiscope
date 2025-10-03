@@ -24,6 +24,7 @@
             font-size: 1rem;
             font-family: Arial, Helvetica, sans-serif;
             margin: 10px auto;
+            background-color: oklch(93.2% 0.032 255.585);
         }
 
         h3 {
@@ -53,7 +54,7 @@
 
         .container {
             display: grid;
-            width: max-content
+            background-color: oklch(98.5% 0.002 247.839);
         }
 
         .wrapper {
@@ -71,6 +72,22 @@
             padding: 0.5rem 1rem;
             border-radius: 6px;
             width: 100%;
+        }
+
+        .copy-btn {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 60px;
+            transition: background-color 0.3s;
+        }
+
+        .copy-btn:hover {
+            background-color: #0056b3;
         }
 
         #tax-serie {
@@ -94,7 +111,12 @@
             align-items: center;
         }
 
-        @media only screen and (max-width: 600px) {
+        #csm-logo {
+            margin: 0 auto;
+            margin-bottom: 2rem;
+        }
+
+        @media only screen and (max-width: 950px) {
             .container {
                 width: 100%;
             }
@@ -114,6 +136,7 @@
         }
         ?>
         <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 6px; padding: 1rem;">
+            <img id="csm-logo" src="https://csmti.com.br/assets/images/logo.png" alt="CSM Logo">
             <fieldset>
                 <legend>Tipo de nota</legend>
                 <div>
@@ -126,21 +149,30 @@
                 </div>
             </fieldset>
             <br />
-            <label for="session">ID Sessão</label>
-            <input name="session" id="session" type="text" required value='<?= $session ?? '' ?>'>
-            <br />
-            <label for="js-session">JS Sessão</label>
-            <input name="js-session" id="js-session" type="text" required value='<?= $jsSession ?? '' ?>'>
-            <br />
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <label for="session" style="text-align:center; min-width: 120px;">ID Sessão</label>
+                <input name="session" id="session" type="text" required value='<?= $session ?? '' ?>' style="flex: 1;">
+                <!-- <button type="button" class="copy-btn" data-target="session">Copiar</button> -->
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <label for="js-session" style="text-align:center; min-width: 120px;">JS Sessão</label>
+                <input name="js-session" id="js-session" type="text" required value='<?= $jsSession ?? '' ?>' style="flex: 1;">
+                <!-- <button type="button" class="copy-btn" data-target="js-session">Copiar</button> -->
+            </div>
+
             <fieldset>
                 <legend>Dados do Usuário</legend>
-                <div>
-                    <label for="cd-user">Código do Usuário</label>
-                    <input name="cd-user" id="cd-user" type="text" required value='<?= $user ?? '' ?>'>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="cd-user" style="text-align:center; min-width: 120px;">Código do Usuário</label>
+                    <input name="cd-user" id="cd-user" type="text" required value='<?= $user ?? '' ?>' style="flex: 1;">
+                    <!-- <button type="button" class="copy-btn" data-target="cd-user">Copiar</button> -->
                 </div>
-                <div>
-                    <label for="ie-emit">I.E. Emitente</label>
-                    <input name="ie-emit" id="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>'>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="ie-emit" style="text-align:center; min-width: 120px;">I.E. Emitente</label>
+                    <input name="ie-emit" id="ie-emit" type="text" required value='<?= $ieEmit ?? '' ?>' style="flex: 1;">
+                    <button type="button" class="copy-btn" data-target="ie-emit">Copiar</button>
                 </div>
             </fieldset>
             <br />
@@ -185,6 +217,33 @@
             <input type="submit" id="submit-button" name="start" value="Iniciar" class="small-input"></input>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+
+                    if (input) {
+                        input.select();
+                        input.setSelectionRange(0, 99999);
+
+                        navigator.clipboard.writeText(input.value).then(() => {
+                            const originalText = this.textContent;
+                            this.textContent = '✓';
+                            this.style.backgroundColor = '#4CAF50';
+
+                            setTimeout(() => {
+                                this.textContent = originalText;
+                                this.style.backgroundColor = '';
+                            }, 2000);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
