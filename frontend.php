@@ -25,6 +25,8 @@
             font-family: Arial, Helvetica, sans-serif;
             margin: 10px auto;
             background-color: oklch(93.2% 0.032 255.585);
+            width: 100%;
+            max-width: 100%;
         }
 
         h3 {
