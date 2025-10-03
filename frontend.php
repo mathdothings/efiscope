@@ -74,11 +74,12 @@
             padding: 0.5rem 1rem;
             border-radius: 6px;
             width: 100%;
+            text-align: center;
         }
 
         .copy-btn {
             padding: 5px 10px;
-            background-color: #007bff;
+            background-color: oklch(92.8% 0.006 264.531);
             color: white;
             border: none;
             border-radius: 4px;
@@ -234,7 +235,7 @@
                         navigator.clipboard.writeText(input.value).then(() => {
                             const originalText = this.textContent;
                             this.textContent = '✓';
-                            this.style.backgroundColor = '#4CAF50';
+                            this.style.backgroundColor = 'oklch(79.2% 0.209 151.711)';
 
                             setTimeout(() => {
                                 this.textContent = originalText;
