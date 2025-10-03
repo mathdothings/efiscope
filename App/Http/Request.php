@@ -256,7 +256,6 @@ final class Request
 
         // 22 bytes represents an empty minimal .zip file
         if (strpos($contentType, 'application/zip') !== false && filesize($filepath) > 22) {
-            // echo '<br />';
             echo '<p style="margin: 5px 0; text-align: center; background-color: #F0FDF4; color: #00C951; padding: 0.5rem 1rem; border: 1px solid #B9F8CF; border-radius: 6px;">' . 'Os arquivos foram baixados em: ' . realpath($filepath) . '</p>';
         }
 
