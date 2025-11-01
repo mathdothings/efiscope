@@ -7,8 +7,8 @@ use RuntimeException;
 
 function unzip(): bool
 {
-    $extractPath = __DIR__ . '/../../Output/Extracted/';
-    $outputPath = __DIR__ . '/../../Output/';
+    $extractPath = realpath(__DIR__ . '/../../Output/Extracted/');
+    $outputPath = realpath(__DIR__ . '/../../Output/');
 
     if (!file_exists($extractPath)) {
         mkdir($extractPath, 0777, true);
@@ -30,7 +30,7 @@ function unzip(): bool
             continue;
         }
 
-        $fullPath = $outputPath . $file;
+        $fullPath = realpath($outputPath . DIRECTORY_SEPARATOR . $file);
 
         if (!$zip->open($fullPath) === true) {
             echo "Failed to open: $file";

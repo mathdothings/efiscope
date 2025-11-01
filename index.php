@@ -1,14 +1,13 @@
 <?php
+require_once realpath(__DIR__ . '/App/Utils/dd.php');
+require_once realpath(__DIR__ . '/App/Utils/pretty_print.php');
+require_once realpath(__DIR__ . '/App/Utils/date_convert.php');
+require_once realpath(__DIR__ . '/App/Utils/unzip.php');
+require_once realpath(__DIR__ . '/App/Utils/delete_all_files.php');
 
-require_once __DIR__ . '/App/Utils/dd.php';
-require_once __DIR__ . '/App/Utils/pretty_print.php';
-require_once __DIR__ . '/App/Utils/date_convert.php';
-require_once __DIR__ . '/App/Utils/unzip.php';
-require_once __DIR__ . '/App/Utils/delete_all_files.php';
-
-require_once __DIR__ . '/App/DTOs/SubmitDTO.php';
-require_once __DIR__ . '/App/Http/Request.php';
-require_once __DIR__ . '/App/Scrapper/Scrapper.php';
+require_once realpath(__DIR__ . '/App/DTOs/SubmitDTO.php');
+require_once realpath(__DIR__ . '/App/Http/Request.php');
+require_once realpath(__DIR__ . '/App/Scrapper/Scrapper.php');
 
 use App\Http\Request;
 use App\Scrapper\Scrapper;
@@ -68,7 +67,7 @@ $data = [
     'start' => $start
 ];
 
-require_once __DIR__ . '/frontend.php';
+require_once realpath(__DIR__ . '/frontend.php');
 
 $dto = SubmitDTO::create($data);
 $scrapper = new Scrapper($dto);

@@ -4,13 +4,13 @@ namespace App\Utils;
 
 function delete_all_files()
 {
-    $directory = __DIR__ . '/../../Output/';
+    $directory = realpath(__DIR__ . '/../../Output/');
     $files = scandir($directory);
     $path = '';
 
     foreach ($files as $file) {
         if ($file != '.' && $file != '..') {
-            $path = $directory . $file;
+            $path = realpath($directory . DIRECTORY_SEPARATOR . $file);
         }
 
         if (is_file($path)) {

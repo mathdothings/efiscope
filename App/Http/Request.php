@@ -220,7 +220,7 @@ final class Request
         curl_setopt($curlHandler, CURLOPT_POST, true);
         curl_setopt($curlHandler, CURLOPT_POSTFIELDS, $postFields);
 
-        $downloadDir = __DIR__ . '/../../Output';
+        $downloadDir = realpath(__DIR__ . '/../../Output');
 
         if (!file_exists($downloadDir)) {
             mkdir($downloadDir, 0755, true);
@@ -260,7 +260,7 @@ final class Request
         }
 
         if (strpos($contentType, 'application/zip') === false) {
-            $content = file_get_contents($filepath);
+            // $content = file_get_contents($filepath);
             unlink($filepath);
         }
 
