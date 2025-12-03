@@ -84,7 +84,7 @@ if (!$start) {
 $sum = [];
 
 if (count($dto->keysList)) {
-    $request->download($dto->keysList);
+    $request->downloadByKey($dto->keysList);
     $sum = $dto->keysList;
 
     show_success_message($sum);

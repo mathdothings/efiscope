@@ -44,13 +44,13 @@ final class Request
             'Sec-Fetch-Site: same-origin',
             'Sec-Fetch-User: ?1',
             'Upgrade-Insecure-Requests: 1',
-            'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
             'sec-ch-ua: "Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
             'sec-ch-ua-mobile: ?0',
             'sec-ch-ua-platform: "Linux"'
         ];
 
-        $post = "chamadaInterna=true&execCons=true&id_sessao=$session&$datasQuery&tipoContrib=$tipoContribuinte&ieEmitente=$ieEmitente&cpfCnpjEmitDest=&numNota=&serie=&chave=&prot=&pages=500";
+        $post = "chamadaInterna=true&execCons=true&id_sessao=$session&$datasQuery&tipoContrib=$tipoContribuinte&ieEmitente=$ieEmitente&cpfCnpjEmitDest=&numNota=&serie=&chave=&prot=&pages=500&cd_usuario={$this->dto->user}";
 
         curl_setopt_array($curlHandler, [
             CURLOPT_URL => $url,
@@ -64,7 +64,7 @@ final class Request
         ]);
 
         $response = curl_exec($curlHandler);
-        curl_close($curlHandler);
+        unset($curlHandler);
 
         return $this->ensureUTF8Enconding($response);
     }
@@ -80,6 +80,7 @@ final class Request
             'id_sessao' => $this->dto->session,
             'dataIni' => $date,
             'dataFim' => $date,
+            'cd_usuario' => $this->dto->user,
             'ieEmitente' => $this->dto->ieEmit,
             'cnpjEmitente' => '',
             'cpfCnpjDest' => '',
@@ -104,7 +105,7 @@ final class Request
             'Sec-Fetch-Site: same-origin',
             'Sec-Fetch-User: ?1',
             'Upgrade-Insecure-Requests: 1',
-            'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
             'sec-ch-ua: "Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
             'sec-ch-ua-mobile: ?0',
             'sec-ch-ua-platform: "Linux"'
@@ -120,13 +121,13 @@ final class Request
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_HEADER => false,
             CURLOPT_ENCODING => '',
         ]);
 
         $response = curl_exec($curlHandler);
-        curl_close($curlHandler);
+        unset($curlHandler);
 
         return $this->ensureUTF8Enconding($response);
     }
@@ -172,7 +173,7 @@ final class Request
             'Sec-Fetch-Site: same-origin',
             'Sec-Fetch-User: ?1',
             'Upgrade-Insecure-Requests: 1',
-            'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+            'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
             'sec-ch-ua: "Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
             'sec-ch-ua-mobile: ?0',
             'sec-ch-ua-platform: "Linux"'
@@ -185,6 +186,7 @@ final class Request
             'chamadaInterna' => 'true',
             'execCons' => '',
             'id_sessao' => $session,
+            'cd_usuario' => $this->dto->user,
             'dataIni' => $dataInicio,
             'dataFim' => $dataFim,
             'tipoContrib' => $tipoContribuinte,
@@ -201,6 +203,7 @@ final class Request
             'chamadaInterna' => 'true',
             'execCons' => '',
             'id_sessao' => $session,
+            'cd_usuario' => $this->dto->user,
             'dataIni' => $dataInicio,
             'dataFim' => $dataFim,
             'ieEmitente' => $ieEmitente,
@@ -260,11 +263,229 @@ final class Request
         }
 
         if (strpos($contentType, 'application/zip') === false) {
-            // $content = file_get_contents($filepath);
             unlink($filepath);
         }
 
-        curl_close($curlHandler);
+        unset($curlHandler);
+    }
+
+    public function downloadByKey(array $keys)
+    {
+        $taxType = $this->dto->taxType;
+        $session = $this->dto->session;
+        $jsSession = $this->dto->jsSession;
+        $ieEmitente = $this->dto->ieEmit;
+        $tipoContribuinte = $this->dto->contribuitionType;
+        $dataInicio = str_replace('-', '/', new DateTime($this->dto->dateStart)->format('d-m-Y'));
+        $dataFim = str_replace('-', '/', new DateTime($this->dto->dateEnd)->format('d-m-Y'));
+        $chaves = $keys;
+
+        $downloadDir = realpath(__DIR__ . '/../../Output');
+
+        if (!file_exists($downloadDir)) {
+            mkdir($downloadDir, 0755, true);
+        }
+
+        $downloadedCount = 0;
+        $failedCount = 0;
+
+        foreach ($chaves as $index => $key) {
+            echo "<p>Baixando chave " . ($index + 1) . " de " . count($chaves) . " Chave: {$key}</p>";
+
+            $searchResult = $this->makeSearchRequest($key, $session, $jsSession, $dataInicio, $dataFim, $tipoContribuinte, $ieEmitente);
+
+            if (!$searchResult) {
+                echo '<p style="color: orange;">Falha na consulta inicial para chave: ' . $key . '</p>';
+                $failedCount++;
+                continue;
+            }
+
+            // waiting time between search and download
+            sleep(2);
+
+            $downloadResult = $this->makeDownloadRequest($key, $session, $jsSession, $dataInicio, $dataFim, $tipoContribuinte, $ieEmitente);
+
+            if ($downloadResult && is_array($downloadResult)) {
+                list($response, $httpCode, $contentType) = $downloadResult;
+
+                if ($httpCode === 200 && strpos($contentType, 'application/zip') !== false && strlen($response) > 22) {
+                    $safeKey = preg_replace('/[^a-zA-Z0-9_-]/', '_', $key);
+                    $filename = "CHAVE_{$safeKey}_" . date('Y-m-d_H-i-s') . '.zip';
+                    $filepath = $downloadDir . DIRECTORY_SEPARATOR . $filename;
+
+                    file_put_contents($filepath, $response);
+
+                    if (filesize($filepath) > 22) {
+                        echo '<p style="margin: 5px 0; text-align: center; background-color: #F0FDF4; color: #00C951; padding: 0.5rem 1rem; border: 1px solid #B9F8CF; border-radius: 6px;">' .
+                            '✓ Baixado: ' . basename($filepath) . ' (' . filesize($filepath) . ' bytes)' .
+                            '</p>';
+                        $downloadedCount++;
+                    } else {
+                        echo '<p style="color: orange;">Arquivo ZIP vazio para chave: ' . $key . '</p>';
+                        unlink($filepath);
+                        $failedCount++;
+                    }
+                } else {
+                    if (strpos($response, 'Não foram encontrados itens no banco de dados para a consulta.') !== false) {
+                        '<p style="color: red;">✗ A chave não foi encontrada na base.' . $key . '. HTTP: ' . $httpCode . ', Tipo: ' . $contentType . '</p>';
+                    }
+                    echo '<p style="color: red;">✗ Falha ao baixar chave ' . $key . '. HTTP: ' . $httpCode . ', Tipo: ' . $contentType . '</p>';
+                    $failedCount++;
+                }
+            } else {
+                echo '<p style="color: red;">✗ Erro na requisição de download para chave: ' . $key . '</p>';
+                $failedCount++;
+            }
+
+            if ($index < count($chaves) - 1) {
+                // waiting time after download, avoid too many requests
+                sleep(3);
+            }
+        }
+    }
+
+    private function makeSearchRequest($key, $session, $jsSession, $dataInicio, $dataFim, $tipoContribuinte, $ieEmitente)
+    {
+        $curlHandler = curl_init();
+
+        $url = 'https://nfeconsulta.sefaz.pe.gov.br:444/nfe-web/downloadNfe';
+        curl_setopt($curlHandler, CURLOPT_URL, $url);
+        curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandler, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curlHandler, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curlHandler, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curlHandler, CURLOPT_TIMEOUT, 30);
+
+        $headers = [
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-US,en;q=0.5',
+            'Accept-Encoding: gzip, deflate, br, zstd',
+            'Content-Type: application/x-www-form-urlencoded',
+            'Origin: https://nfeconsulta.sefaz.pe.gov.br:444',
+            'DNT: 1',
+            'Sec-GPC: 1',
+            'Connection: keep-alive',
+            'Referer: https://nfeconsulta.sefaz.pe.gov.br:444/nfe-web/downloadNfe',
+            'Upgrade-Insecure-Requests: 1',
+            'Sec-Fetch-Dest: document',
+            'Sec-Fetch-Mode: navigate',
+            'Sec-Fetch-Site: same-origin',
+            'Sec-Fetch-User: ?1',
+            'Priority: u=0, i',
+            'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
+        ];
+
+        curl_setopt($curlHandler, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curlHandler, CURLOPT_COOKIE, $jsSession);
+        curl_setopt($curlHandler, CURLOPT_ENCODING, 'gzip, deflate, br, zstd');
+
+        $postData = [
+            'chamadaInterna' => 'true',
+            'execCons' => 'true',
+            'id_sessao' => $session,
+            'cd_usuario' => $this->dto->user,
+            'dataIni' => $dataInicio,
+            'dataFim' => $dataFim,
+            'tipoContrib' => $tipoContribuinte,
+            'ieEmitente' => $ieEmitente,
+            'cpfCnpjEmitDest' => '',
+            'numNota' => '',
+            'serie' => '',
+            'chave' => $key,
+            'prot' => '',
+            'pages' => '25'
+        ];
+
+        $postFields = http_build_query($postData, '', '&', PHP_QUERY_RFC3986);
+        $postFields = str_replace('%5E', '^', $postFields);
+
+        curl_setopt($curlHandler, CURLOPT_POST, true);
+        curl_setopt($curlHandler, CURLOPT_POSTFIELDS, $postFields);
+
+        curl_exec($curlHandler);
+        $httpCode = curl_getinfo($curlHandler, CURLINFO_HTTP_CODE);
+
+        unset($curlHandler);
+
+        return $httpCode === 200;
+    }
+
+    private function makeDownloadRequest($key, $session, $jsSession, $dataInicio, $dataFim, $tipoContribuinte, $ieEmitente)
+    {
+        $curlHandler = curl_init();
+
+        $url = 'https://nfeconsulta.sefaz.pe.gov.br:444/nfe-web/downloadNota';
+        curl_setopt($curlHandler, CURLOPT_URL, $url);
+        curl_setopt($curlHandler, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandler, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curlHandler, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curlHandler, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curlHandler, CURLOPT_TIMEOUT, 30);
+
+        $headers = [
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-US,en;q=0.5',
+            'Accept-Encoding: gzip, deflate, br, zstd',
+            'Content-Type: application/x-www-form-urlencoded',
+            'Origin: https://nfeconsulta.sefaz.pe.gov.br:444',
+            'DNT: 1',
+            'Sec-GPC: 1',
+            'Connection: keep-alive',
+            'Referer: https://nfeconsulta.sefaz.pe.gov.br:444/nfe-web/downloadNfe',
+            'Upgrade-Insecure-Requests: 1',
+            'Sec-Fetch-Dest: document',
+            'Sec-Fetch-Mode: navigate',
+            'Sec-Fetch-Site: same-origin',
+            'Sec-Fetch-User: ?1',
+            'Priority: u=0, i',
+            'Pragma: no-cache',
+            'Cache-Control: no-cache',
+            'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
+        ];
+
+        curl_setopt($curlHandler, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curlHandler, CURLOPT_COOKIE, $jsSession);
+        curl_setopt($curlHandler, CURLOPT_ENCODING, 'gzip, deflate, br, zstd');
+
+        $postData = [
+            'chamadaInterna' => 'true',
+            'execCons' => '',
+            'id_sessao' => $session,
+            'cd_usuario' => $this->dto->user,
+            'dataIni' => $dataInicio,
+            'dataFim' => $dataFim,
+            'tipoContrib' => $tipoContribuinte,
+            'ieEmitente' => $ieEmitente,
+            'cpfCnpjEmitDest' => '',
+            'numNota' => '',
+            'serie' => '',
+            'chave' => $key,
+            'prot' => '',
+            'pages' => '25',
+            'lista' => 'on',
+            'cb' => $key
+        ];
+
+        $postFields = http_build_query($postData, '', '&', PHP_QUERY_RFC3986);
+        $postFields = preg_replace('/%5B\d+%5D=/', '=', $postFields);
+        $postFields = str_replace('%5E', '^', $postFields);
+
+        curl_setopt($curlHandler, CURLOPT_POST, true);
+        curl_setopt($curlHandler, CURLOPT_POSTFIELDS, $postFields);
+
+        $response = curl_exec($curlHandler);
+
+        if (curl_errno($curlHandler)) {
+            unset($curlHandler);
+            return false;
+        }
+
+        $httpCode = curl_getinfo($curlHandler, CURLINFO_HTTP_CODE);
+        $contentType = curl_getinfo($curlHandler, CURLINFO_CONTENT_TYPE);
+
+        unset($curlHandler);
+
+        return [$response, $httpCode, $contentType];
     }
 
     /**
