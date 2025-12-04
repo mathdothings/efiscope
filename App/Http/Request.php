@@ -327,10 +327,11 @@ final class Request
                     }
                 } else {
                     if (strpos($response, 'Não foram encontrados itens no banco de dados para a consulta.') !== false) {
-                        '<p style="color: red;">✗ A chave não foi encontrada na base.' . $key . '. HTTP: ' . $httpCode . ', Tipo: ' . $contentType . '</p>';
+                        echo '<p style="color: red;">✗ A chave não foi encontrada na base.' . $key . '. HTTP: ' . $httpCode . ', Tipo: ' . $contentType . '</p>';
+                    } else {
+                        echo '<p style="color: red;">✗ Falha ao baixar chave ' . $key . '. HTTP: ' . $httpCode . ', Tipo: ' . $contentType . '</p>';
+                        $failedCount++;
                     }
-                    echo '<p style="color: red;">✗ Falha ao baixar chave ' . $key . '. HTTP: ' . $httpCode . ', Tipo: ' . $contentType . '</p>';
-                    $failedCount++;
                 }
             } else {
                 echo '<p style="color: red;">✗ Erro na requisição de download para chave: ' . $key . '</p>';
