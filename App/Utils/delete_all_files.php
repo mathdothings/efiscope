@@ -2,19 +2,32 @@
 
 namespace App\Utils;
 
-function delete_all_files()
-{
-    $directory = realpath(__DIR__ . '/../../Output/');
-    $files = scandir($directory);
-    $path = '';
+use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
 
-    foreach ($files as $file) {
-        if ($file != '.' && $file != '..') {
-            $path = realpath($directory . DIRECTORY_SEPARATOR . $file);
+/**
+ * Recursively deletes all .zip files within the Output folder, 
+ * but ignores the 'Extracted' folder to protect extracted data.
+ */
+function delete_all_files(): void
+{
+    $basePath = realpath(__DIR__ . '/../../Output/');
+    $downloadedPath = $basePath . DIRECTORY_SEPARATOR . 'Downloaded' . DIRECTORY_SEPARATOR;
+
+    if (!file_exists($downloadedPath)) return;
+
+    $directory = new RecursiveDirectoryIterator($downloadedPath);
+    $iterator = new RecursiveIteratorIterator($directory);
+
+    foreach ($iterator as $info) {
+        if ($info->isDir() || strtolower($info->getExtension()) !== 'zip') {
+            continue;
         }
 
-        if (is_file($path)) {
-            unlink($path);
+        $filePath = $info->getRealPath();
+
+        if (is_file($filePath)) {
+            unlink($filePath);
         }
     }
 }

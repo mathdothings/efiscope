@@ -206,18 +206,18 @@
                 <br />
                 <label for="keys-list">Chaves de Acesso</label>
                 <textarea name="keys-list" id="keys-list" pattern="(\d{44}\s*)+"><?=
-                                                                                    htmlspecialchars($_POST['keys-list'] ?? '', ENT_QUOTES)
+                                                                                    htmlspecialchars($keysListRaw ?? '', ENT_QUOTES)
                                                                                     ?></textarea>
-                <br />
+                <!-- <br />
                 <label for="tax-number">Número da Nota</label>
                 <textarea name="tax-number" id="tax-number" pattern="(\d{9}\s*)+"><?=
-                                                                                    htmlspecialchars($_POST['tax-number'] ?? '', ENT_QUOTES)
+                                                                                    htmlspecialchars($taxNumberRaw ?? '', ENT_QUOTES)
                                                                                     ?></textarea>
                 <label for="tax-serie">Série</label>
-                <input id="tax-serie" name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'>
+                <input id="tax-serie" name="tax-serie" type="number" value='<?= $taxSerie ?? '' ?>'> -->
             </div>
             <br>
-            <input type="submit" id="submit-button" name="start" value="Iniciar" class="small-input"></input>
+            <input type="submit" id="submit-button" name="start" value="Iniciar" class="small-input">
         </form>
     </div>
 

@@ -1,163 +1,111 @@
 <?php
-require_once realpath(__DIR__ . '/App/Utils/dd.php');
-require_once realpath(__DIR__ . '/App/Utils/pretty_print.php');
-require_once realpath(__DIR__ . '/App/Utils/date_convert.php');
-require_once realpath(__DIR__ . '/App/Utils/unzip.php');
-require_once realpath(__DIR__ . '/App/Utils/delete_all_files.php');
 
-require_once realpath(__DIR__ . '/App/DTOs/SubmitDTO.php');
-require_once realpath(__DIR__ . '/App/Http/Request.php');
-require_once realpath(__DIR__ . '/App/Scrapper/Scrapper.php');
+session_start();
+require_once __DIR__ . '/autoload.php';
 
-use App\Http\Request;
-use App\Scrapper\Scrapper;
 use App\DTOs\FormSubmission\SubmitDTO;
+use App\Infrastructure\HttpClient;
+use App\Providers\NfceProvider;
+use App\Providers\NfeProvider;
+use App\Services\DownloaderService;
+use App\Services\UIResponder;
 
-use function App\Utils\dd;
-use function App\Utils\date_convert;
-use function App\Utils\delete_all_files;
-use function App\Utils\pretty_print;
-use function App\Utils\unzip;
+// Helper to get value from POST or SESSION
+$getVal = fn($key, $default = '') => $_POST[$key] ?? $_SESSION[$key] ?? $default;
 
-$taxType = $_POST['tax-type'] ?? '';
-$session = $_POST['session'] ?? '';
-$jsSession = $_POST['js-session'] ?? '';
-$user = $_POST['cd-user'] ?? '';
-$ieEmit = $_POST['ie-emit'] ?? '';
-$contribuitionType = $_POST['contribuition-type'] ?? '';
-$dateStart = $_POST['date-start'] ?? '';
-$dateEnd = $_POST['date-end'] ?? '';
+// Basic input group
+$taxType = $getVal('tax-type', 'nfe');
+$session = $getVal('session');
+$jsSession = $getVal('js-session');
+$user = $getVal('cd-user');
+$ieEmit = $getVal('ie-emit');
+$contribuitionType = $getVal('contribuition-type');
+$dateStart = $getVal('date-start');
+$dateEnd = $getVal('date-end');
+$taxSerie = $getVal('tax-serie');
+
+$taxNumberRaw = $getVal('tax-number');
+$keysListRaw = $getVal('keys-list');
+
 $taxNumber = array_filter(
-    preg_split('/\R/', trim(str_replace("'", '', $_POST['tax-number'] ?? ''))),
-    fn($item) => $item !== ''
-);
-$taxSerie = $_POST['tax-serie'] ?? '';
-$keysList = array_filter(
-    preg_split('/\R/', trim(str_replace("'", '', $_POST['keys-list'] ?? ''))),
+    preg_split('/\R/', trim(str_replace("'", '', $taxNumberRaw))),
     fn($item) => $item !== ''
 );
 
+$keysList = array_filter(
+    preg_split('/\R/', trim(str_replace("'", '', $keysListRaw))),
+    fn($item) => $item !== ''
+);
+
+// Automatic tax type detection
 if (count($keysList)) {
     $taxType = 'nfe';
     $message = 'Automaticamente alterado o tipo de nota para NFE para baixar pelas Chaves de Acesso!';
 }
 
+// Logic for contribution type defaults
 if ($taxType === 'nfce') {
     $contribuitionType = '';
-}
-
-if ($taxType === 'nfe' && $contribuitionType === '') {
+} elseif ($taxType === 'nfe' && $contribuitionType === '') {
     $contribuitionType = 'E';
 }
 
-$start = isset($_POST['start']) ? true : false;
+// Persistence: Save current state to session
+$persistFields = [
+    'tax-type',
+    'session',
+    'js-session',
+    'cd-user',
+    'ie-emit',
+    'contribuition-type',
+    'date-start',
+    'date-end',
+    'tax-number',
+    'keys-list',
+    'tax-serie'
+];
+foreach ($persistFields as $field) {
+    if (isset($_POST[$field])) {
+        $_SESSION[$field] = $_POST[$field];
+    }
+}
+
+$start = isset($_POST['start']);
 
 $data = [
-    'taxType' => $taxType,
-    'session' => trim($session),
-    'jsSession' => trim($jsSession),
-    'user' => trim($user),
-    'ieEmit' => trim($ieEmit),
+    'taxType'            => $taxType,
+    'session'            => trim($session),
+    'jsSession'          => trim($jsSession),
+    'user'               => trim($user),
+    'ieEmit'             => trim($ieEmit),
     'contribuition-type' => $contribuitionType,
-    'dateStart' => $dateStart,
-    'dateEnd' => $dateEnd,
-    'taxNumber' => $taxNumber,
-    'taxSerie' => $taxSerie,
-    'keysList' => $keysList,
-    'start' => $start
+    'dateStart'          => $dateStart,
+    'dateEnd'            => $dateEnd,
+    'taxNumber'          => $taxNumber,
+    'taxSerie'           => $taxSerie,
+    'keysList'           => $keysList,
+    'start'              => $start
 ];
 
-require_once realpath(__DIR__ . '/frontend.php');
-
-$dto = SubmitDTO::create($data);
-$scrapper = new Scrapper($dto);
-$request = new Request($dto);
-
-$final = (int) new DateTime($dto->dateEnd)->format('d') - (int) new DateTime($dto->dateStart)->format('d') + 1;
-$initial = (int) new DateTime($dto->dateStart)->format('d');
-$dates = [];
+// Show UI
+require_once __DIR__ . '/frontend.php';
 
 if (!$start) {
     return;
 }
 
-$sum = [];
+// Dependency Injection Bootstrap (The Manual Way)
+$dto = SubmitDTO::create($data);
+$client = new HttpClient();
+$ui = new UIResponder();
 
-if (count($dto->keysList)) {
-    $request->downloadByKey($dto->keysList);
-    $sum = $dto->keysList;
+// O/C Principle
+$provider = match ($dto->taxType) {
+    'nfe'  => new NfeProvider($dto, $client),
+    'nfce' => new NfceProvider($dto, $client),
+    default => throw new Exception("Tipo de nota desconhecido: {$dto->taxType}")
+};
 
-    show_success_message($sum);
-    unzip();
-    delete_all_files();
-    die;
-}
-
-if (count($dto->taxNumber)) {
-    $keys = [];
-    $date = new DateTime()->format('d/m/Y');
-
-    foreach ($dto->taxNumber as $number) {
-        $dto->taxNumber[0] = $number;
-        $response = $request->NFCEAttempt($date);
-        $scrapper->date = $date;
-        $key = $scrapper->scrap($response);
-        $sum = array_merge($sum, $key);
-        $keys[] = $key[0];
-        sleep(rand(5, 15));
-    }
-
-    $request->download($keys);
-    show_success_message($sum);
-    unzip();
-    delete_all_files();
-    return;
-}
-
-// date format dd/mm/yyyy
-for ($i = 0; $i < $final; $i++) {
-    $d = $initial;
-    $d += $i;
-    $day = $d > 9 ? $d : '0' . $d;
-    $parts = explode('-', $dto->dateEnd);
-    $dt = "$day/$parts[1]/$parts[0]";
-
-    $dates[] = $dt;
-}
-
-foreach ($dates as $index => $date) {
-    $keys = [];
-
-    if ($dto->taxType === 'nfe') {
-        $response = $request->NFEAttempt($date);
-        $scrapper->date = $date;
-        $keys = $scrapper->scrap($response);
-    }
-
-    if ($dto->taxType === 'nfce') {
-        $response = $request->NFCEAttempt($date);
-        $scrapper->date = $date;
-        $keys = $scrapper->scrap($response);
-    }
-
-    if (count($keys) <= 0) {
-        continue;
-    }
-
-    $request->date = date_convert($date);
-    $request->download($keys);
-    $sum = array_merge($sum, $keys);
-
-    if ($index + 1 !== count($dates)) {
-        sleep(rand(3, 5));
-    }
-}
-
-show_success_message($sum);
-unzip();
-delete_all_files();
-
-function show_success_message(array $amount)
-{
-    echo '<p style="text-align: center; background-color: #F0FDF4; color: #00C951; padding: 0.5rem 1rem; border: 1px solid #B9F8CF; border-radius: 6px;">' . 'Foram encontrados: '  . count($amount) . ' resultados!' . '</p>';
-}
+// SRP
+$service = new DownloaderService($dto, $provider, $ui);
+$service->run();

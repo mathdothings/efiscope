@@ -2,85 +2,79 @@
 
 namespace App\Scrapper;
 
-use function App\Utils\dd;
-use App\DTOs\FormSubmission\SubmitDTO;
 use Dom\HTMLDocument;
+use App\Scrapper\ScrapResult;
 
 final class Scrapper
 {
-    public string $date = '';
-    public function __construct(private SubmitDTO $dto) {}
+    /**
+     * @param string $taxType 'nfe' | 'nfce'
+     * @param string $date
+     */
+    public function __construct(
+        private string $taxType,
+        public string $date = ''
+    ) {}
 
-    public function scrap(string $response): array
+    /**
+     * Parse the HTML response and return a ScrapResult.
+     *
+     * @param string $response
+     * @return ScrapResult
+     * @throws \RuntimeException If the session is invalid.
+     */
+    public function scrap(string $response): ScrapResult
     {
         $dom = HTMLDocument::createFromString($response);
         $error = $dom->getElementById('msgErro');
 
-        if (strpos($error->innerHTML, 'ERRO')) {
-            echo '<div id="session-error">';
-            echo '<p style="text-align: center; background-color: #FFE2E2; color: #FB2C36; padding: 0.5rem 1rem; border: 1px solid #FFA2A2; border-radius: 6px;">Erro ao validar sessão!</p>';
-            echo '</div>';
-            die;
+        if ($error && str_contains($error->innerHTML, 'ERRO')) {
+            throw new \RuntimeException("Invalid session detected");
         }
 
-        $amount = $dom->querySelectorAll('.thickbox');
-        $elements = $dom->querySelectorAll('.tabelaCadastroLinha');
-        echo '<hr />';
-        echo '<p>' . $this->date . ' (' . $amount->length . ')' . '</p>';
+        $amountElements = $dom->querySelectorAll('.thickbox');
+        $dataElements = $dom->querySelectorAll('.tabelaCadastroLinha');
+        $isFull = $amountElements->length >= 500;
 
-        if ($amount->length === 0) return [];
-        if ($amount->length === 500) echo '<h3 style="background-color: #f52b37; color: white; padding: 1rem;"> Houveram mais de 500 registros em ' . $this->date . '</h1>';
+        if ($amountElements->length === 0) {
+            return new ScrapResult([], $this->date, false, []);
+        }
 
         $chavesDeAcesso = [];
-        $chaves = [];
-
-        echo '<details>';
-        echo '<summary>Detalhes</summary>';
-        echo '<table>';
-        echo '    <thead>';
-        echo '        <tr>';
-        echo '            <th>Chave de Acesso</th>';
-        echo '            <th style="width: 100px">Nota</th>';
-        echo '            <th style="width: 100px">Série</th>';
-        echo '        </tr>';
-        echo '    </thead>';
-        echo '    <tbody>';
-
-        foreach ($elements as $element) {
+        foreach ($dataElements as $element) {
             $chavesDeAcesso[] = $element->innerHTML;
         }
 
-        if ($this->dto->taxType === 'nfe') {
-            $valores = array_chunk($chavesDeAcesso, 9);
-        } else {
-            $valores = array_chunk($chavesDeAcesso, 8);
-        }
+        $chunkSize = ($this->taxType === 'nfe') ? 9 : 8;
+        $valores = array_chunk($chavesDeAcesso, $chunkSize);
+
+        $keys = [];
+        $details = [];
 
         foreach ($valores as $value) {
-            echo '<tr>';
             $aTag = $value[1];
+            $key = '';
 
             if (preg_match('/<a[^>]*>([0-9]+)<\/a>/', $aTag, $matches)) {
-                $number = $matches[1];
-                echo '<td>' . $number . '</td>';
-                $chaves[] = $number;
+                $key = $matches[1];
+                $keys[] = $key;
             }
 
-            if ($this->dto->taxType === 'nfe') {
-                echo '<td>' . ($value[6]) . '</td>';
-                echo '<td>' . ($value[7]) . '</td>';
-                echo '</tr>';
+            if ($this->taxType === 'nfe') {
+                $details[] = [
+                    'key' => $key,
+                    'number' => $value[6] ?? '',
+                    'serie' => $value[7] ?? '',
+                ];
             } else {
-                echo '<td>' . ($value[5]) . '</td>';
-                echo '<td>' . ($value[6]) . '</td>';
-                echo '</tr>';
+                $details[] = [
+                    'key' => $key,
+                    'number' => $value[5] ?? '',
+                    'serie' => $value[6] ?? '',
+                ];
             }
         }
 
-        echo '    </tbody>';
-        echo '</table>';
-        echo '</details>';
-
-        return $chaves;
+        return new ScrapResult($keys, $this->date, $isFull, $details);
     }
 }
