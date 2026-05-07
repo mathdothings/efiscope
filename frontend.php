@@ -139,15 +139,15 @@
         }
         ?>
         <form method="post" class="container" style="border: 1px solid #ccc; border-radius: 6px; padding: 1rem;">
-            <img id="csm-logo" src="https://csmti.com.br/assets/images/logo.png" alt="CSM Logo">
+            <!-- <img id="csm-logo" src="" alt="Logo"> -->
             <fieldset>
                 <legend>Tipo de nota</legend>
                 <div>
-                    <input type="radio" id="nfe" name="tax-type" required value="nfe" <?= $taxType === 'nfe' ? 'checked' : '' ?> />
+                    <input type="radio" id="nfe" name="tax-type" required value="nfe" <?= ($taxType ?? 'nfe') === 'nfe' ? 'checked' : '' ?> />
                     <label for="nfe">NFE (Nota Grande)</label>
                 </div>
                 <div>
-                    <input type="radio" id="nfce" name="tax-type" required value="nfce" <?= $taxType === 'nfce' ? 'checked' : '' ?> />
+                    <input type="radio" id="nfce" name="tax-type" required value="nfce" <?= ($taxType ?? '') === 'nfce' ? 'checked' : '' ?> />
                     <label for="nfce">NFCE (Cupom)</label>
                 </div>
             </fieldset>
@@ -182,11 +182,11 @@
             <fieldset>
                 <legend>Tipo de contribuinte</legend>
                 <div>
-                    <input type="radio" id="emitente" name="contribuition-type" value="E" <?= $contribuitionType === 'E' ? 'checked' : '' ?> />
+                    <input type="radio" id="emitente" name="contribuition-type" value="E" <?= ($contribuitionType ?? '') === 'E' ? 'checked' : '' ?> />
                     <label for="emitente">Emitente (Saída)</label>
                 </div>
                 <div>
-                    <input type="radio" id="destinatario" value="D" name="contribuition-type" <?= $contribuitionType === 'D' ? 'checked' : '' ?> />
+                    <input type="radio" id="destinatario" value="D" name="contribuition-type" <?= ($contribuitionType ?? '') === 'D' ? 'checked' : '' ?> />
                     <label for="destinatario">Destinatário (Entrada)</label>
                 </div>
             </fieldset>
