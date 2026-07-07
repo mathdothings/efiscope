@@ -41,7 +41,7 @@ abstract class BaseProvider implements InvoiceProvider
             'Sec-Fetch-Site: same-origin',
             'Sec-Fetch-User: ?1',
             'Priority: u=0, i',
-            'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         ];
     }
 

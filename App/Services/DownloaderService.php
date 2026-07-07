@@ -41,22 +41,150 @@ class DownloaderService
         }
     }
 
+    private function retry(array $keysList): void
+    {
+        $this->ui->log("Reiniciando download de chaves falhas...", "blue");
+
+        $maxRetries = 10;
+        $failedKeys = [];
+
+        foreach ($keysList as $index => $key) {
+            $this->ui->log("Baixando chave " . ($index + 1) . " de " . count($keysList) . " :: Processando chave $key");
+
+            $downloadSuccess = false;
+            $lastError = null;
+
+            // Retry loop for each key
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $filepath = $this->provider->downloadByKey($key);
+
+                    // Check if download was successful
+                    if ($filepath && file_exists($filepath) && filesize($filepath) > 0) {
+                        $this->ui->downloadFinished($filepath);
+                        $downloadSuccess = true;
+                        break; // Success - exit retry loop
+                    } else {
+                        throw new \Exception("Download returned empty or invalid file");
+                    }
+                } catch (\Exception $e) {
+                    $lastError = $e->getMessage();
+
+                    // Check if this error is retryable
+                    $isConnectionReset = (
+                        strpos($lastError, 'Connection reset by peer') !== false ||
+                        strpos($lastError, 'recv failure') !== false ||
+                        strpos($lastError, 'timeout') !== false ||
+                        strpos($lastError, 'connection refused') !== false
+                    );
+
+                    // If not retryable, fail immediately
+                    if (!$isConnectionReset && $attempt > 1) {
+                        $this->ui->log("Erro não-retentável: $lastError", "red");
+                        break;
+                    }
+
+                    // If this was the last attempt, log failure
+                    if ($attempt === $maxRetries) {
+                        $this->ui->log("Falha após $maxRetries tentativas: $lastError", "red");
+                    } else {
+                        // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s, 60s...
+                        $waitTime = min(pow(2, $attempt - 1), 60);
+                        $this->ui->log("Tentativa $attempt/$maxRetries falhou. Aguardando {$waitTime}s antes de tentar novamente...", "gold");
+                        sleep($waitTime);
+                    }
+                }
+            }
+
+            if (!$downloadSuccess) {
+                $failedKeys[] = $key;
+                $this->ui->log("Falha definitiva ao baixar chave: $key", "red");
+            }
+
+            // Wait between different keys
+            if ($index < count($this->dto->keysList) - 1) {
+                sleep(2);
+            }
+        }
+
+        // Report summary
+        if (!empty($failedKeys)) {
+            $this->ui->log("\n" . count($failedKeys) . " chave(s) falharam:\n" . implode("\n", $failedKeys), "crimson");
+        }
+
+        $this->finish($this->dto->keysList);
+    }
+
     private function processByKeys(): void
     {
         $this->ui->log("Iniciando download por Chaves de Acesso...", "blue");
 
+        $maxRetries = 10;
+        $failedKeys = [];
+
         foreach ($this->dto->keysList as $index => $key) {
             $this->ui->log("Baixando chave " . ($index + 1) . " de " . count($this->dto->keysList) . " :: Processando chave $key");
 
-            // Note: Currently BaseProvider doesn't have searchByKey, I'll use raw search for now
-            // or refactor Providers to handle single key search.
+            $downloadSuccess = false;
+            $lastError = null;
 
-            $filepath = $this->provider->downloadByKey($key);
-            $this->ui->downloadFinished($filepath);
+            // Retry loop for each key
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $filepath = $this->provider->downloadByKey($key);
 
+                    // Check if download was successful
+                    if ($filepath && file_exists($filepath) && filesize($filepath) > 0) {
+                        $this->ui->downloadFinished($filepath);
+                        $downloadSuccess = true;
+                        break; // Success - exit retry loop
+                    } else {
+                        throw new \Exception("Download returned empty or invalid file");
+                    }
+                } catch (\Exception $e) {
+                    $lastError = $e->getMessage();
+
+                    // Check if this error is retryable
+                    $isConnectionReset = (
+                        strpos($lastError, 'Connection reset by peer') !== false ||
+                        strpos($lastError, 'recv failure') !== false ||
+                        strpos($lastError, 'timeout') !== false ||
+                        strpos($lastError, 'connection refused') !== false
+                    );
+
+                    // If not retryable, fail immediately
+                    if (!$isConnectionReset && $attempt > 1) {
+                        $this->ui->log("Erro não-retentável: $lastError", "red");
+                        break;
+                    }
+
+                    // If this was the last attempt, log failure
+                    if ($attempt === $maxRetries) {
+                        $this->ui->log("Falha após $maxRetries tentativas: $lastError", "red");
+                    } else {
+                        // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s, 60s...
+                        $waitTime = min(pow(2, $attempt - 1), 60);
+                        $this->ui->log("Tentativa $attempt/$maxRetries falhou. Aguardando {$waitTime}s antes de tentar novamente...", "gold");
+                        sleep($waitTime);
+                    }
+                }
+            }
+
+            if (!$downloadSuccess) {
+                $failedKeys[] = $key;
+                $this->ui->log("Falha definitiva ao baixar chave: $key", "red");
+            }
+
+            // Wait between different keys
             if ($index < count($this->dto->keysList) - 1) {
                 sleep(2);
             }
+        }
+
+        // Report summary
+        if (!empty($failedKeys)) {
+            $this->ui->log("\n" . count($failedKeys) . " chave(s) falharam:\n" . implode("\n", $failedKeys), "crimson");
+            $this->retry($failedKeys);
         }
 
         $this->finish($this->dto->keysList);
@@ -99,18 +227,73 @@ class DownloaderService
         $dates = $this->generateDateRange();
         $allKeys = [];
 
+        $maxRetries = 10;
+
         foreach ($dates as $index => $date) {
-            $result = $this->provider->search($date);
-            $this->ui->searchStatus($date, $result->count(), $result->isFull);
-            $this->ui->renderDetails($result);
+            $downloadSuccess = false;
+            $lastError = null;
+            $filepath = null;
 
-            if ($result->count() > 0) {
-                $dateObj = DateTime::createFromFormat('d/m/Y', $result->date);
-                $dateFormatted = $dateObj ? $dateObj->format('d-m-Y') : $result->date;
-                $filepath = $this->provider->download($result->keys, $dateFormatted);
+            // Retry loop for each key
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+                try {
+                    $result = $this->provider->search($date);
+                    $this->ui->searchStatus($date, $result->count(), $result->isFull);
+                    $this->ui->renderDetails($result);
 
-                $this->ui->downloadFinished($filepath);
-                $allKeys = array_merge($allKeys, $result->keys);
+                    if (count($result->keys) > 0) {
+                        $dateObj = DateTime::createFromFormat('d/m/Y', $result->date);
+                        $dateFormatted = $dateObj ? $dateObj->format('d-m-Y') : $result->date;
+                        $filepath = $this->provider->download($result->keys, $dateFormatted);
+                    } else {
+                        $downloadSuccess = true; // No keys to download, but not a failure
+                        break;
+                    }
+
+                    if ($filepath && file_exists($filepath) && filesize($filepath) > 0) {
+                        $this->ui->downloadFinished($filepath);
+                        $allKeys = array_merge($allKeys, $result->keys);
+                        $downloadSuccess = true;
+                        break;
+                    } else {
+                        throw new \Exception("Download returned empty or invalid file");
+                    }
+                } catch (\Exception $e) {
+                    $lastError = $e->getMessage();
+
+                    // Check if this error is retryable
+                    $isConnectionReset = (
+                        strpos($lastError, 'Connection reset by peer') !== false ||
+                        strpos($lastError, 'recv failure') !== false ||
+                        strpos($lastError, 'timeout') !== false ||
+                        strpos($lastError, 'connection refused') !== false
+                    );
+
+                    // If not retryable, fail immediately
+                    if (!$isConnectionReset && $attempt > 1) {
+                        if ($e instanceof \App\Exceptions\ExpiredSessionException) {
+                            $this->ui->sessionError();
+                            die;
+                        }
+
+                        $this->ui->log("Erro não retentável: $lastError", "red");
+                        break;
+                    }
+
+                    // If this was the last attempt, log failure
+                    if ($attempt === $maxRetries) {
+                        $this->ui->log("Falha após $maxRetries tentativas: $lastError", "red");
+                    } else {
+                        // Exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s, 60s...
+                        $waitTime = min(pow(2, $attempt - 1), 60);
+                        $this->ui->log("Tentativa $attempt/$maxRetries falhou. Aguardando {$waitTime}s antes de tentar novamente...", "gold");
+                        sleep($waitTime);
+                    }
+                }
+            }
+
+            if (!$downloadSuccess) {
+                $this->ui->log("Falha definitiva ao baixar as chaves do dia $date", "red");
             }
 
             if ($index + 1 !== count($dates)) {

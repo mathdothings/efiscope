@@ -2,6 +2,8 @@
 
 namespace App\Infrastructure;
 
+use App\Exceptions\ExpiredSessionException;
+
 class HttpClient
 {
     /**
@@ -46,6 +48,11 @@ class HttpClient
             throw new \RuntimeException("CURL Error: $error");
         }
 
+        if (strpos($response, 'ERRO AO VALIDAR SESSAO E-FISCO') !== false) {
+            unset($curlHandler);
+            throw new ExpiredSessionException();
+        }
+
         unset($curlHandler);
         return $response;
     }
@@ -70,6 +77,9 @@ class HttpClient
         $curlHandler = curl_init();
 
         curl_setopt_array($curlHandler, [
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+            // CURLOPT_FRESH_CONNECT => true,
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
